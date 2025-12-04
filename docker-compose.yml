@@ -1,14 +1,12 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: doa-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_MULTIPLE_DATABASES: doa_auth,doa_users,doa_products,doa_orders,doa_payments
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +20,6 @@ services:
     networks:
       - doa-network
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: doa-redis
@@ -30,44 +27,230 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
     networks:
       - doa-network
 
-  # Auth Service
   auth-service:
-    build:
-      context: ./backend/auth-service
-      dockerfile: Dockerfile
+    build: ./backend/auth-service
     container_name: doa-auth-service
     environment:
       NODE_ENV: development
       PORT: 3001
       DB_HOST: postgres
-      DB_PORT: 5432
       DB_NAME: doa_auth
       DB_USER: postgres
       DB_PASSWORD: postgres
       JWT_ACCESS_SECRET: dev-access-secret
       JWT_REFRESH_SECRET: dev-refresh-secret
-      CORS_ORIGIN: http://localhost:3100,http://localhost:3200
     ports:
       - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./backend/auth-service:/app
-      - /app/node_modules
-    command: npm run dev
     networks:
       - doa-network
 
-  # PgAdmin (Optional - for database management)
+  user-service:
+    build: ./backend/user-service
+    container_name: doa-user-service
+    environment:
+      PORT: 3002
+      DB_HOST: postgres
+      DB_NAME: doa_users
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres
+      - auth-service
+    networks:
+      - doa-network
+
+  product-service:
+    build: ./backend/product-service
+    container_name: doa-product-service
+    environment:
+      PORT: 3003
+      DB_HOST: postgres
+      DB_NAME: doa_products
+    ports:
+      - "3003:3003"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  order-service:
+    build: ./backend/order-service
+    container_name: doa-order-service
+    environment:
+      PORT: 3004
+      DB_HOST: postgres
+      DB_NAME: doa_orders
+    ports:
+      - "3004:3004"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  payment-service:
+    build: ./backend/payment-service
+    container_name: doa-payment-service
+    environment:
+      PORT: 3005
+      DB_HOST: postgres
+      DB_NAME: doa_payments
+    ports:
+      - "3005:3005"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  shipping-service:
+    build: ./backend/shipping-service
+    container_name: doa-shipping-service
+    environment:
+      PORT: 3006
+      DB_HOST: postgres
+      DB_NAME: doa_shippings
+    ports:
+      - "3006:3006"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  seller-service:
+    build: ./backend/seller-service
+    container_name: doa-seller-service
+    environment:
+      PORT: 3007
+      DB_HOST: postgres
+      DB_NAME: doa_sellers
+    ports:
+      - "3007:3007"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  settlement-service:
+    build: ./backend/settlement-service
+    container_name: doa-settlement-service
+    environment:
+      PORT: 3008
+      DB_HOST: postgres
+      DB_NAME: doa_settlements
+    ports:
+      - "3008:3008"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  coupon-service:
+    build: ./backend/coupon-service
+    container_name: doa-coupon-service
+    environment:
+      PORT: 3009
+      DB_HOST: postgres
+      DB_NAME: doa_coupons
+    ports:
+      - "3009:3009"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - doa-network
+
+  inventory-service:
+    build: ./backend/inventory-service
+    container_name: doa-inventory-service
+    environment:
+      PORT: 3010
+      DB_HOST: postgres
+      DB_NAME: doa_inventory
+    ports:
+      - "3010:3010"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - doa-network
+
+  notification-service:
+    build: ./backend/notification-service
+    container_name: doa-notification-service
+    environment:
+      PORT: 3011
+      DB_HOST: postgres
+      DB_NAME: doa_notifications
+    ports:
+      - "3011:3011"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  review-service:
+    build: ./backend/review-service
+    container_name: doa-review-service
+    environment:
+      PORT: 3012
+      DB_HOST: postgres
+      DB_NAME: doa_reviews
+    ports:
+      - "3012:3012"
+    depends_on:
+      - postgres
+    networks:
+      - doa-network
+
+  search-service:
+    build: ./backend/search-service
+    container_name: doa-search-service
+    environment:
+      PORT: 3013
+    ports:
+      - "3013:3013"
+    networks:
+      - doa-network
+
+  admin-service:
+    build: ./backend/admin-service
+    container_name: doa-admin-service
+    environment:
+      PORT: 3014
+    ports:
+      - "3014:3014"
+    networks:
+      - doa-network
+
+  file-service:
+    build: ./backend/file-service
+    container_name: doa-file-service
+    environment:
+      PORT: 3015
+    ports:
+      - "3015:3015"
+    networks:
+      - doa-network
+
+  stats-service:
+    build: ./backend/stats-service
+    container_name: doa-stats-service
+    environment:
+      PORT: 3016
+      DB_HOST: postgres
+    ports:
+      - "3016:3016"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - doa-network
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: doa-pgadmin
@@ -88,4 +271,3 @@ volumes:
 networks:
   doa-network:
     driver: bridge
-
