@@ -1,6 +1,6 @@
 import { EventBridgeClient, PutEventsCommand } from '@aws-sdk/client-eventbridge';
 import { v4 as uuidv4 } from 'uuid';
-import { EventType, BaseEvent } from '@types/index';
+import { EventType, BaseEvent } from '@/types';
 import { logger } from '@utils/logger';
 
 const eventBridgeClient = new EventBridgeClient({

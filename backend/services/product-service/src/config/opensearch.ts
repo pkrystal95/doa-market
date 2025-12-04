@@ -22,6 +22,14 @@ export const INDICES = {
 };
 
 export const initializeOpenSearch = async (): Promise<void> => {
+  // Check if OpenSearch is enabled
+  const opensearchEnabled = process.env.OPENSEARCH_ENABLED !== 'false';
+
+  if (!opensearchEnabled) {
+    logger.warn('OpenSearch is disabled. Skipping initialization.');
+    return;
+  }
+
   try {
     // Check cluster health
     const health = await opensearchClient.cluster.health();
@@ -100,8 +108,8 @@ export const initializeOpenSearch = async (): Promise<void> => {
 
     logger.info('OpenSearch initialized successfully');
   } catch (error) {
-    logger.error('OpenSearch initialization failed:', error);
-    throw error;
+    logger.warn('OpenSearch initialization failed (continuing without OpenSearch):', error);
+    // Don't throw error, just continue without OpenSearch
   }
 };
 

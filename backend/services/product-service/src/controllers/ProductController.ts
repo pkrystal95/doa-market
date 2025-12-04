@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { productService } from '@services/ProductService';
-import { AuthRequest } from '@types/index';
+import { AuthRequest } from '@/types';
 import { CreateProductDto, UpdateProductDto, ProductQueryDto } from '@dto/product.dto';
 import { logger } from '@utils/logger';
 

@@ -1,4 +1,69 @@
+# IDEs and Editors
 .github/
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment Variables
 .env*
+!.env.example
+
+# Dependencies
+node_modules/
+**/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build Output
+dist/
+build/
+out/
+.next/
+.nuxt/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest-cache/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# AWS / Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# CDK
+cdk.out/
+.cdk.staging/
+
+# Misc
+*.pid
+*.seed
+*.pid.lock

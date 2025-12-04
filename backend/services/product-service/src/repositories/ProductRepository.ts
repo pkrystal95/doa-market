@@ -1,7 +1,7 @@
 import { AppDataSource } from '@config/database';
 import { Product } from '@models/Product';
 import { Repository, FindOptionsWhere, ILike, Between, In } from 'typeorm';
-import { ProductFilter, PaginationQuery } from '@types/index';
+import { ProductFilter, PaginationQuery } from '@/types';
 import { logger } from '@utils/logger';
 
 export class ProductRepository {

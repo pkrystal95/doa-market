@@ -3,12 +3,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import { errorHandler } from './middleware/error-handler';
 import { notFoundHandler } from './middleware/not-found-handler';
 import userRoutes from './routes/user.routes';
 import addressRoutes from './routes/address.routes';
 import { logger } from './utils/logger';
 import { sequelize } from './config/database';
+import { swaggerSpec } from './config/swagger';
 
 dotenv.config();
 
@@ -24,6 +26,10 @@ app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) }
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'user-service', timestamp: new Date().toISOString() });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'User Service API Docs',
+}));
 
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/users/:userId/addresses`, addressRoutes);

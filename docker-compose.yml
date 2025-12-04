@@ -1,17 +1,27 @@
+# DOA Market Local Development Environment
+# Version: 1.0
+# Run: docker-compose up -d
+# Stop: docker-compose down
+# Clean: docker-compose down -v
+
 version: '3.8'
 
 services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
   postgres:
     image: postgres:15-alpine
     container_name: doa-postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -20,35 +30,117 @@ services:
     networks:
       - doa-network
 
+  # ============================================
+  # Redis Cache
+  # ============================================
   redis:
     image: redis:7-alpine
     container_name: doa-redis
     ports:
       - "6379:6379"
+    command: redis-server --appendonly yes --requirepass redis123
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     networks:
       - doa-network
 
+  # ============================================
+  # LocalStack (AWS Services Emulator)
+  # ============================================
+  localstack:
+    image: localstack/localstack:latest
+    container_name: doa-localstack
+    environment:
+      SERVICES: s3,sqs,sns,dynamodb,secretsmanager,events
+      DEBUG: 1
+      DATA_DIR: /tmp/localstack/data
+      AWS_DEFAULT_REGION: ap-northeast-2
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack_data:/tmp/localstack
+      - ./scripts/localstack-init.sh:/etc/localstack/init/ready.d/init.sh
+    networks:
+      - doa-network
+
+  # ============================================
+  # OpenSearch (Search Engine)
+  # ============================================
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: doa-opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - doa-network
+
+  # ============================================
+  # Mailhog (Email Testing)
+  # ============================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: doa-mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - doa-network
+
+  # ============================================
+  # Backend Services
+  # ============================================
   auth-service:
-    build: ./backend/auth-service
+    build:
+      context: ./backend/services/auth-service
+      dockerfile: Dockerfile
     container_name: doa-auth-service
     environment:
       NODE_ENV: development
       PORT: 3001
+      LOG_LEVEL: debug
       DB_HOST: postgres
+      DB_PORT: 5432
       DB_NAME: doa_auth
       DB_USER: postgres
-      DB_PASSWORD: postgres
-      JWT_ACCESS_SECRET: dev-access-secret
-      JWT_REFRESH_SECRET: dev-refresh-secret
+      DB_PASSWORD: postgres123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis123
+      JWT_ACCESS_SECRET: dev-access-secret-change-in-production
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      AWS_REGION: ap-northeast-2
+      AWS_ENDPOINT: http://localstack:4566
     ports:
       - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - doa-network
+    restart: unless-stopped
 
   user-service:
     build: ./backend/user-service
@@ -66,18 +158,36 @@ services:
       - doa-network
 
   product-service:
-    build: ./backend/product-service
+    build:
+      context: ./backend/services/product-service
+      dockerfile: Dockerfile
     container_name: doa-product-service
     environment:
+      NODE_ENV: development
       PORT: 3003
+      LOG_LEVEL: debug
       DB_HOST: postgres
+      DB_PORT: 5432
       DB_NAME: doa_products
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis123
+      OPENSEARCH_NODE: http://opensearch:9200
+      AWS_REGION: ap-northeast-2
+      AWS_ENDPOINT: http://localstack:4566
+      S3_BUCKET: doa-market-dev-products
     ports:
       - "3003:3003"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - doa-network
+    restart: unless-stopped
 
   order-service:
     build: ./backend/order-service
@@ -264,10 +374,23 @@ services:
     networks:
       - doa-network
 
+# ============================================
+# Volumes
+# ============================================
 volumes:
   postgres_data:
+    name: doa_postgres_data
   redis_data:
+    name: doa_redis_data
+  localstack_data:
+    name: doa_localstack_data
+  opensearch_data:
+    name: doa_opensearch_data
 
+# ============================================
+# Networks
+# ============================================
 networks:
   doa-network:
     driver: bridge
+    name: doa-network

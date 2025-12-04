@@ -3,7 +3,7 @@ import { redisService } from '@config/redis';
 import { opensearchService } from '@config/opensearch';
 import { eventPublisher } from '@events/publishers/EventPublisher';
 import { CreateProductDto, UpdateProductDto, ProductQueryDto, ProductResponseDto } from '@dto/product.dto';
-import { ProductFilter, PaginationQuery, EventType } from '@types/index';
+import { ProductFilter, PaginationQuery, EventType } from '@/types';
 import { logger } from '@utils/logger';
 import { AppError } from '@utils/errors';
 
@@ -160,7 +160,7 @@ export class ProductService {
       const sortedProducts = productIds.map((id: string) => productMap.get(id)).filter(Boolean);
 
       return {
-        data: sortedProducts.map((p) => this.transformToDto(p!)),
+        data: sortedProducts.map((p: any) => this.transformToDto(p)),
         meta: {
           page,
           limit,

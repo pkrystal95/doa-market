@@ -72,6 +72,41 @@ doa-market/
 - **Auth**: AWS Cognito
 - **Monitoring**: CloudWatch, X-Ray
 
+## 빠른 시작 (Quick Start)
+
+**⚡️ 백엔드 서버를 바로 실행하고 API를 테스트하고 싶다면:**
+
+### 📖 [상세 퀵스타트 가이드 보기 →](./QUICKSTART.md)
+
+```bash
+# 1. 인프라 서비스 시작 (PostgreSQL, Redis, OpenSearch, LocalStack)
+docker-compose up -d postgres redis localstack opensearch
+
+# 2. Product Service 실행
+cd backend/services/product-service
+npm install
+cp .env.example .env
+npm run migration:run
+npm run dev
+
+# 3. API 테스트
+./test-api.sh
+# 또는 curl 직접 사용
+curl http://localhost:3003/api/v1/health
+curl http://localhost:3003/api/v1/products
+```
+
+**제공되는 도구:**
+- 📄 **QUICKSTART.md**: 단계별 상세 가이드
+- 🧪 **test-api.sh**: 자동화된 API 테스트 스크립트
+- 📮 **Postman Collection**: `docs/api/postman-collection.json`
+- 🔧 **Admin Tools**:
+  - pgAdmin: http://localhost:5050
+  - Redis Commander: http://localhost:8081
+  - Mailhog: http://localhost:8025
+
+---
+
 ## 시작하기
 
 ### Prerequisites
@@ -106,10 +141,11 @@ flutter run
 각 마이크로서비스별 README를 참고하세요.
 
 ```bash
-# 예시: Auth Service
-cd backend/auth-service
+# 예시: Product Service
+cd backend/services/product-service
 npm install
-npm run dev  # http://localhost:3001
+cp .env.example .env
+npm run dev  # http://localhost:3003
 ```
 
 ## 주요 기능

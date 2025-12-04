@@ -2,9 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import shippingRoutes from './routes/shipping.routes';
 import { sequelize } from './config/database';
 import { logger } from './utils/logger';
+import { swaggerSpec } from './config/swagger';
 
 dotenv.config();
 
@@ -18,6 +20,8 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'shipping-service', timestamp: new Date().toISOString() });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/v1/shippings', shippingRoutes);
 

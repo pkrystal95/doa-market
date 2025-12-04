@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { AuthRequest, AuthUser } from '@types/index';
+import { AuthRequest, AuthUser } from '@/types';
 import { UnauthorizedError, ForbiddenError } from '@utils/errors';
 import { logger } from '@utils/logger';
 

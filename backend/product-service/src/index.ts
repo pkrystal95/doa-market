@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import productRoutes from './routes/product.routes';
 import categoryRoutes from './routes/category.routes';
 import { sequelize } from './config/database';
 import { logger } from './utils/logger';
+import { swaggerSpec } from './config/swagger';
 
 dotenv.config();
 
@@ -17,8 +19,12 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'product-service' });
+  res.json({ status: 'ok', service: 'product-service', timestamp: new Date().toISOString() });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'Product Service API Docs',
+}));
 
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/categories', categoryRoutes);
