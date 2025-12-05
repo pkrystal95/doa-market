@@ -24,7 +24,6 @@ export class Product {
   id: string;
 
   @Column({ name: 'seller_id', type: 'uuid' })
-  @Index()
   sellerId: string;
 
   @Column({ name: 'category_id', type: 'uuid' })
