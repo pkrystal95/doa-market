@@ -4,14 +4,14 @@ import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import { initializeDatabase } from '@config/database';
-import adminRoutes from '@routes/admin.routes';
+import wishlistRoutes from '@routes/wishlist.routes';
 import { errorHandler, notFoundHandler } from '@middlewares/error-handler';
 import logger from '@utils/logger';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3015;
+const PORT = process.env.PORT || 3013;
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGINS?.split(',') || '*' }));
@@ -23,7 +23,7 @@ app.get('/api/v1/health', (req, res) => {
   res.json({
     success: true,
     data: {
-      service: 'admin-service',
+      service: 'wishlist-service',
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -32,10 +32,10 @@ app.get('/api/v1/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.json({ service: 'admin-service', version: '1.0.0', status: 'running' });
+  res.json({ service: 'wishlist-service', version: '1.0.0', status: 'running' });
 });
 
-app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/wishlist', wishlistRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
@@ -44,7 +44,7 @@ async function startServer() {
     await initializeDatabase();
     logger.info('Database initialized');
     app.listen(PORT, () => {
-      logger.info(`admin-service running on port ${PORT}`);
+      logger.info(`wishlist-service running on port ${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

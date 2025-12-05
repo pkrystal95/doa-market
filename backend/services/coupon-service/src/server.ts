@@ -3,25 +3,27 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import { initializeDatabase } from '@config/database';
+import couponRoutes from '@routes/coupon.routes';
+import { errorHandler, notFoundHandler } from '@middlewares/error-handler';
+import logger from '@utils/logger';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3012;
 
-// Middleware
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGINS?.split(',') || '*' }));
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
 app.get('/api/v1/health', (req, res) => {
   res.json({
     success: true,
     data: {
-      service: process.env.SERVICE_NAME,
+      service: 'coupon-service',
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -29,27 +31,35 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
-// Root endpoint
 app.get('/', (req, res) => {
-  res.json({
-    service: process.env.SERVICE_NAME,
-    version: '1.0.0',
-    status: 'running',
-  });
+  res.json({ service: 'coupon-service', version: '1.0.0', status: 'running' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(\`\${process.env.SERVICE_NAME} running on port \${PORT}\`);
-});
+app.use('/api/v1/coupons', couponRoutes);
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-// Graceful shutdown
+async function startServer() {
+  try {
+    await initializeDatabase();
+    logger.info('Database initialized');
+    app.listen(PORT, () => {
+      logger.info(`coupon-service running on port ${PORT}`);
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
+
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+  logger.info('SIGTERM signal received');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
+  logger.info('SIGINT signal received');
   process.exit(0);
 });
