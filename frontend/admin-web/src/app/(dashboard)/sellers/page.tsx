@@ -1,258 +1,271 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { sellersApi } from '@/lib/api';
-import { Seller } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Check, X, Ban, Unlock } from 'lucide-react';
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { Add, MoreVert, CheckCircle, Block, Visibility, Store } from '@mui/icons-material';
+import { PageHeader } from '@/components/common/page-header';
+import { DataTable, Column } from '@/components/common/data-table';
+
+// 샘플 데이터
+const sellers = [
+  {
+    id: '1',
+    storeName: '테크샵',
+    ownerName: '김판매',
+    email: 'seller1@doamarket.com',
+    phone: '010-1111-2222',
+    status: 'active',
+    products: 124,
+    totalSales: 45000000,
+    commission: 2250000,
+    rating: 4.8,
+    createdAt: '2023-10-15',
+  },
+  {
+    id: '2',
+    storeName: '패션몰',
+    ownerName: '이상인',
+    email: 'seller2@doamarket.com',
+    phone: '010-2222-3333',
+    status: 'active',
+    products: 89,
+    totalSales: 32000000,
+    commission: 1600000,
+    rating: 4.6,
+    createdAt: '2023-11-20',
+  },
+  {
+    id: '3',
+    storeName: '푸드마켓',
+    ownerName: '박식품',
+    email: 'seller3@doamarket.com',
+    phone: '010-3333-4444',
+    status: 'pending',
+    products: 45,
+    totalSales: 0,
+    commission: 0,
+    rating: 0,
+    createdAt: '2024-12-01',
+  },
+  {
+    id: '4',
+    storeName: '북스토어',
+    ownerName: '정도서',
+    email: 'seller4@doamarket.com',
+    phone: '010-4444-5555',
+    status: 'suspended',
+    products: 156,
+    totalSales: 28000000,
+    commission: 1400000,
+    rating: 3.9,
+    createdAt: '2023-09-10',
+  },
+];
 
 export default function SellersPage() {
-  const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState<string | undefined>(undefined);
-  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [currentSeller, setCurrentSeller] = useState<any>(null);
 
-  const { data: sellers, isLoading } = useQuery({
-    queryKey: ['sellers', page, filter],
-    queryFn: async () => {
-      const response = await sellersApi.getSellers({
-        page,
-        limit: 20,
-        filters: filter ? { status: filter } : undefined,
-      });
-      return response;
-    },
-  });
-
-  const approveMutation = useMutation({
-    mutationFn: (sellerId: string) => sellersApi.approveSeller(sellerId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sellers'] });
-    },
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: ({ sellerId, reason }: { sellerId: string; reason: string }) =>
-      sellersApi.rejectSeller(sellerId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sellers'] });
-    },
-  });
-
-  const suspendMutation = useMutation({
-    mutationFn: ({ sellerId, reason }: { sellerId: string; reason: string }) =>
-      sellersApi.suspendSeller(sellerId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sellers'] });
-    },
-  });
-
-  const unsuspendMutation = useMutation({
-    mutationFn: (sellerId: string) => sellersApi.unsuspendSeller(sellerId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sellers'] });
-    },
-  });
-
-  const handleApprove = (sellerId: string) => {
-    if (confirm('이 판매자를 승인하시겠습니까?')) {
-      approveMutation.mutate(sellerId);
-    }
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, seller: any) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentSeller(seller);
   };
 
-  const handleReject = (sellerId: string) => {
-    const reason = prompt('거부 사유를 입력하세요:');
-    if (reason) {
-      rejectMutation.mutate({ sellerId, reason });
-    }
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setCurrentSeller(null);
   };
 
-  const handleSuspend = (sellerId: string) => {
-    const reason = prompt('정지 사유를 입력하세요:');
-    if (reason) {
-      suspendMutation.mutate({ sellerId, reason });
-    }
-  };
-
-  const handleUnsuspend = (sellerId: string) => {
-    if (confirm('이 판매자의 정지를 해제하시겠습니까?')) {
-      unsuspendMutation.mutate(sellerId);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="warning">승인대기</Badge>;
-      case 'approved':
-        return <Badge variant="success">승인됨</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">거부됨</Badge>;
-      case 'suspended':
-        return <Badge variant="secondary">정지됨</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  if (isLoading) {
-    return <div className="p-8">로딩 중...</div>;
-  }
+  const columns: Column[] = [
+    {
+      id: 'storeName',
+      label: '스토어',
+      minWidth: 200,
+      sortable: true,
+      format: (value: string, row: any) => (
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Avatar sx={{ bgcolor: 'primary.main' }}>
+            <Store />
+          </Avatar>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {value}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.ownerName}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
+    },
+    {
+      id: 'email',
+      label: '이메일',
+      minWidth: 180,
+    },
+    {
+      id: 'phone',
+      label: '연락처',
+      minWidth: 130,
+    },
+    {
+      id: 'products',
+      label: '상품수',
+      minWidth: 80,
+      align: 'center',
+      sortable: true,
+      format: (value: number) => `${value}개`,
+    },
+    {
+      id: 'totalSales',
+      label: '총 매출',
+      minWidth: 130,
+      align: 'right',
+      sortable: true,
+      format: (value: number) => `₩${value.toLocaleString()}`,
+    },
+    {
+      id: 'commission',
+      label: '수수료',
+      minWidth: 120,
+      align: 'right',
+      sortable: true,
+      format: (value: number) => `₩${value.toLocaleString()}`,
+    },
+    {
+      id: 'rating',
+      label: '평점',
+      minWidth: 80,
+      align: 'center',
+      sortable: true,
+      format: (value: number) => value > 0 ? `⭐ ${value}` : '-',
+    },
+    {
+      id: 'status',
+      label: '상태',
+      minWidth: 100,
+      align: 'center',
+      format: (value: string) => {
+        const statusMap: any = {
+          active: { label: '활성', color: 'success' },
+          pending: { label: '승인대기', color: 'warning' },
+          suspended: { label: '정지', color: 'error' },
+        };
+        const status = statusMap[value] || statusMap.active;
+        return (
+          <Chip
+            label={status.label}
+            color={status.color}
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        );
+      },
+    },
+    {
+      id: 'createdAt',
+      label: '가입일',
+      minWidth: 120,
+      sortable: true,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">판매자 관리</h1>
-          <p className="text-gray-500 mt-2">판매자 승인 및 관리</p>
-        </div>
-      </div>
+    <Box>
+      <PageHeader
+        title="판매자 관리"
+        subtitle="입점 판매자를 관리하고 승인하세요"
+        breadcrumbs={[
+          { label: '홈', href: '/dashboard' },
+          { label: '판매자 관리' },
+        ]}
+        action={{
+          label: '판매자 추가',
+          onClick: () => console.log('Add seller'),
+          icon: <Add />,
+        }}
+      />
 
-      {/* 필터 */}
-      <div className="flex space-x-2">
-        <Button
-          variant={filter === undefined ? 'default' : 'outline'}
-          onClick={() => setFilter(undefined)}
-        >
-          전체
-        </Button>
-        <Button
-          variant={filter === 'pending' ? 'default' : 'outline'}
-          onClick={() => setFilter('pending')}
-        >
-          승인대기
-        </Button>
-        <Button
-          variant={filter === 'approved' ? 'default' : 'outline'}
-          onClick={() => setFilter('approved')}
-        >
-          승인됨
-        </Button>
-        <Button
-          variant={filter === 'suspended' ? 'default' : 'outline'}
-          onClick={() => setFilter('suspended')}
-        >
-          정지됨
-        </Button>
-      </div>
+      {/* 판매자 통계 */}
+      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+        {[
+          { label: '전체', count: 148, color: 'default' },
+          { label: '활성', count: 135, color: 'success' },
+          { label: '승인대기', count: 8, color: 'warning' },
+          { label: '정지', count: 5, color: 'error' },
+        ].map((stat) => (
+          <Box
+            key={stat.label}
+            sx={{
+              flex: 1,
+              p: 2,
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              border: (theme) => `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              {stat.label}
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {stat.count}
+            </Typography>
+          </Box>
+        ))}
+      </Stack>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>판매자 목록</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>상호명</TableHead>
-                <TableHead>사업자번호</TableHead>
-                <TableHead>대표자</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>전화번호</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>신청일</TableHead>
-                <TableHead className="text-right">작업</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sellers?.data?.map((seller: Seller) => (
-                <TableRow key={seller.id}>
-                  <TableCell className="font-medium">{seller.businessName}</TableCell>
-                  <TableCell>{seller.businessNumber}</TableCell>
-                  <TableCell>{seller.ownerName}</TableCell>
-                  <TableCell>{seller.email}</TableCell>
-                  <TableCell>{seller.phone}</TableCell>
-                  <TableCell>{getStatusBadge(seller.status)}</TableCell>
-                  <TableCell>
-                    {new Date(seller.createdAt).toLocaleDateString('ko-KR')}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    {seller.status === 'pending' && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handleApprove(seller.id)}
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          승인
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleReject(seller.id)}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          거부
-                        </Button>
-                      </>
-                    )}
-                    {seller.status === 'approved' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleSuspend(seller.id)}
-                      >
-                        <Ban className="h-4 w-4 mr-1" />
-                        정지
-                      </Button>
-                    )}
-                    {seller.status === 'suspended' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUnsuspend(seller.id)}
-                      >
-                        <Unlock className="h-4 w-4 mr-1" />
-                        해제
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      <DataTable
+        columns={columns}
+        rows={sellers}
+        selectable
+        selected={selected}
+        onSelectionChange={setSelected}
+        onRowClick={(row) => console.log('Row clicked:', row)}
+        actions={(row) => (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMenuOpen(e, row);
+            }}
+          >
+            <MoreVert />
+          </IconButton>
+        )}
+      />
 
-          {/* Pagination */}
-          {sellers?.meta && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-500">
-                총 {sellers.meta.total}개 중 {(page - 1) * 20 + 1}-
-                {Math.min(page * 20, sellers.meta.total)}개 표시
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                >
-                  이전
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= sellers.meta.totalPages}
-                >
-                  다음
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>
+          <Visibility fontSize="small" sx={{ mr: 1 }} />
+          상세보기
+        </MenuItem>
+        {currentSeller?.status === 'pending' && (
+          <MenuItem onClick={handleMenuClose}>
+            <CheckCircle fontSize="small" sx={{ mr: 1 }} />
+            승인
+          </MenuItem>
+        )}
+        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+          <Block fontSize="small" sx={{ mr: 1 }} />
+          정지
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 }
-

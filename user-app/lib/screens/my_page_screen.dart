@@ -298,7 +298,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.favorite,
             title: '찜한 상품',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/wishlist');
+            },
           ),
           _buildMenuItem(
             icon: Icons.history,

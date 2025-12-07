@@ -272,32 +272,7 @@ class CartScreen extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('주문하기'),
-                                content: Text(
-                                  '총 ${cart.itemCount}개 상품을 ${cart.totalAmount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원에 주문하시겠습니까?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('취소'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('주문 기능은 준비 중입니다'),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text('주문하기'),
-                                  ),
-                                ],
-                              ),
-                            );
+                            Navigator.of(context).pushNamed('/checkout');
                           },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),

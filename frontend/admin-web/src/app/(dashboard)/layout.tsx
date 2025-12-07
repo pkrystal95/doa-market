@@ -1,10 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Box, CssBaseline } from '@mui/material';
 import { useAuthStore } from '@/store/auth-store';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { SidebarNew } from '@/components/layout/sidebar-new';
+import { HeaderNew } from '@/components/layout/header-new';
+
+const DRAWER_WIDTH = 280;
+const DRAWER_MINI_WIDTH = 88;
 
 export default function DashboardLayout({
   children,
@@ -13,6 +17,8 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const { user } = useAuthStore();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMini, setIsMini] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -20,17 +26,51 @@ export default function DashboardLayout({
     }
   }, [user, router]);
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleMiniToggle = () => {
+    setIsMini(!isMini);
+  };
+
   if (!user) {
     return null;
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-6">{children}</main>
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <CssBaseline />
+      
+      {/* Header */}
+      <HeaderNew
+        onMenuClick={handleDrawerToggle}
+        isMini={isMini}
+        onToggleMini={handleMiniToggle}
+      />
+
+      {/* Sidebar */}
+      <SidebarNew
+        open={mobileOpen}
+        isMini={isMini}
+        onToggle={handleDrawerToggle}
+      />
+
+      {/* Main Content */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, md: 2.5 },
+          mt: 8,
+          bgcolor: 'background.default',
+          minHeight: 'calc(100vh - 64px)',
+          width: '100%',
+          maxWidth: '100%',
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
   );
 }

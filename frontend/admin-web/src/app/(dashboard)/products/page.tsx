@@ -1,251 +1,250 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productsApi } from '@/lib/api';
-import { Product } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Check, X, Trash2, Eye } from 'lucide-react';
-import Link from 'next/link';
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { Add, MoreVert, Edit, Delete, Visibility, VisibilityOff } from '@mui/icons-material';
+import { PageHeader } from '@/components/common/page-header';
+import { DataTable, Column } from '@/components/common/data-table';
+
+// 샘플 데이터
+const products = [
+  {
+    id: '1',
+    name: '무선 마우스',
+    category: '전자기기',
+    seller: '테크샵',
+    price: 45000,
+    stock: 150,
+    sales: 1250,
+    status: 'active',
+    image: '',
+    createdAt: '2024-01-10',
+  },
+  {
+    id: '2',
+    name: '기계식 키보드',
+    category: '전자기기',
+    seller: '테크샵',
+    price: 120000,
+    stock: 80,
+    sales: 680,
+    status: 'active',
+    image: '',
+    createdAt: '2024-01-15',
+  },
+  {
+    id: '3',
+    name: '청바지',
+    category: '의류',
+    seller: '패션몰',
+    price: 59000,
+    stock: 200,
+    sales: 890,
+    status: 'active',
+    image: '',
+    createdAt: '2024-02-01',
+  },
+  {
+    id: '4',
+    name: '노트북 스탠드',
+    category: '전자기기',
+    seller: '테크샵',
+    price: 35000,
+    stock: 0,
+    sales: 450,
+    status: 'soldout',
+    image: '',
+    createdAt: '2024-02-10',
+  },
+  {
+    id: '5',
+    name: 'USB 케이블',
+    category: '전자기기',
+    seller: '테크샵',
+    price: 15000,
+    stock: 500,
+    sales: 2340,
+    status: 'active',
+    image: '',
+    createdAt: '2024-03-01',
+  },
+];
 
 export default function ProductsPage() {
-  const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState<string | undefined>(undefined);
-  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [currentProduct, setCurrentProduct] = useState<any>(null);
 
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products', page, filter],
-    queryFn: async () => {
-      const response = await productsApi.getProducts({
-        page,
-        limit: 20,
-        filters: filter ? { approvalStatus: filter } : undefined,
-      });
-      return response;
-    },
-  });
-
-  const approveMutation = useMutation({
-    mutationFn: (productId: string) => productsApi.approveProduct(productId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: ({ productId, reason }: { productId: string; reason: string }) =>
-      productsApi.rejectProduct(productId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (productId: string) => productsApi.deleteProduct(productId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-  });
-
-  const handleApprove = (productId: string) => {
-    if (confirm('이 상품을 승인하시겠습니까?')) {
-      approveMutation.mutate(productId);
-    }
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, product: any) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentProduct(product);
   };
 
-  const handleReject = (productId: string) => {
-    const reason = prompt('거부 사유를 입력하세요:');
-    if (reason) {
-      rejectMutation.mutate({ productId, reason });
-    }
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setCurrentProduct(null);
   };
 
-  const handleDelete = (productId: string) => {
-    if (confirm('이 상품을 삭제하시겠습니까?')) {
-      deleteMutation.mutate(productId);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="warning">승인대기</Badge>;
-      case 'approved':
-      case 'active':
-        return <Badge variant="success">활성</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">거부됨</Badge>;
-      case 'inactive':
-        return <Badge variant="secondary">비활성</Badge>;
-      case 'out_of_stock':
-        return <Badge variant="secondary">품절</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  if (isLoading) {
-    return <div className="p-8">로딩 중...</div>;
-  }
+  const columns: Column[] = [
+    {
+      id: 'name',
+      label: '상품',
+      minWidth: 250,
+      sortable: true,
+      format: (value: string, row: any) => (
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Avatar
+            variant="rounded"
+            sx={{ bgcolor: 'primary.lighter', color: 'primary.main', width: 48, height: 48 }}
+          >
+            {value[0]}
+          </Avatar>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {value}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.category} • {row.seller}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
+    },
+    {
+      id: 'price',
+      label: '가격',
+      minWidth: 120,
+      align: 'right',
+      sortable: true,
+      format: (value: number) => `₩${value.toLocaleString()}`,
+    },
+    {
+      id: 'stock',
+      label: '재고',
+      minWidth: 80,
+      align: 'center',
+      sortable: true,
+      format: (value: number) => (
+        <Chip
+          label={value}
+          color={value === 0 ? 'error' : value < 50 ? 'warning' : 'success'}
+          size="small"
+          sx={{ fontWeight: 600, minWidth: 60 }}
+        />
+      ),
+    },
+    {
+      id: 'sales',
+      label: '판매량',
+      minWidth: 100,
+      align: 'center',
+      sortable: true,
+      format: (value: number) => `${value.toLocaleString()}개`,
+    },
+    {
+      id: 'status',
+      label: '상태',
+      minWidth: 100,
+      align: 'center',
+      format: (value: string) => {
+        const statusMap: any = {
+          active: { label: '판매중', color: 'success' },
+          soldout: { label: '품절', color: 'error' },
+          hidden: { label: '숨김', color: 'default' },
+        };
+        const status = statusMap[value] || statusMap.active;
+        return (
+          <Chip
+            label={status.label}
+            color={status.color}
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        );
+      },
+    },
+    {
+      id: 'createdAt',
+      label: '등록일',
+      minWidth: 120,
+      sortable: true,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">상품 관리</h1>
-          <p className="text-gray-500 mt-2">상품 심사 및 관리</p>
-        </div>
-        <Link href="/products/categories">
-          <Button variant="outline">카테고리 관리</Button>
-        </Link>
-      </div>
+    <Box>
+      <PageHeader
+        title="상품 관리"
+        subtitle="등록된 모든 상품을 관리하세요"
+        breadcrumbs={[
+          { label: '홈', href: '/dashboard' },
+          { label: '상품 관리' },
+        ]}
+        action={{
+          label: '상품 추가',
+          onClick: () => console.log('Add product'),
+          icon: <Add />,
+        }}
+      />
 
-      {/* 필터 */}
-      <div className="flex space-x-2">
-        <Button
-          variant={filter === undefined ? 'default' : 'outline'}
-          onClick={() => setFilter(undefined)}
-        >
-          전체
-        </Button>
-        <Button
-          variant={filter === 'pending' ? 'default' : 'outline'}
-          onClick={() => setFilter('pending')}
-        >
-          승인대기
-        </Button>
-        <Button
-          variant={filter === 'approved' ? 'default' : 'outline'}
-          onClick={() => setFilter('approved')}
-        >
-          승인됨
-        </Button>
-        <Button
-          variant={filter === 'rejected' ? 'default' : 'outline'}
-          onClick={() => setFilter('rejected')}
-        >
-          거부됨
-        </Button>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={products}
+        selectable
+        selected={selected}
+        onSelectionChange={setSelected}
+        onRowClick={(row) => console.log('Row clicked:', row)}
+        actions={(row) => (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMenuOpen(e, row);
+            }}
+          >
+            <MoreVert />
+          </IconButton>
+        )}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>상품 목록</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>이미지</TableHead>
-                <TableHead>상품명</TableHead>
-                <TableHead>판매자</TableHead>
-                <TableHead>카테고리</TableHead>
-                <TableHead>가격</TableHead>
-                <TableHead>재고</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>등록일</TableHead>
-                <TableHead className="text-right">작업</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products?.data?.map((product: Product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    {product.thumbnail ? (
-                      <img
-                        src={product.thumbnail}
-                        alt={product.name}
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                        <Eye className="h-5 w-5 text-gray-400" />
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.seller?.businessName || '-'}</TableCell>
-                  <TableCell>{product.category?.name || '-'}</TableCell>
-                  <TableCell>₩{product.price.toLocaleString()}</TableCell>
-                  <TableCell>{product.stockQuantity}</TableCell>
-                  <TableCell>{getStatusBadge(product.status)}</TableCell>
-                  <TableCell>
-                    {new Date(product.createdAt).toLocaleDateString('ko-KR')}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    {product.approvalStatus === 'pending' && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handleApprove(product.id)}
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          승인
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleReject(product.id)}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          거부
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(product.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      삭제
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {/* Pagination */}
-          {products?.meta && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-500">
-                총 {products.meta.total}개 중 {(page - 1) * 20 + 1}-
-                {Math.min(page * 20, products.meta.total)}개 표시
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                >
-                  이전
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= products.meta.totalPages}
-                >
-                  다음
-                </Button>
-              </div>
-            </div>
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>
+          <Edit fontSize="small" sx={{ mr: 1 }} />
+          수정
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          {currentProduct?.status === 'hidden' ? (
+            <>
+              <Visibility fontSize="small" sx={{ mr: 1 }} />
+              표시
+            </>
+          ) : (
+            <>
+              <VisibilityOff fontSize="small" sx={{ mr: 1 }} />
+              숨김
+            </>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+          <Delete fontSize="small" sx={{ mr: 1 }} />
+          삭제
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 }

@@ -1,210 +1,222 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi } from '@/lib/api';
-import { User } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { UserX, UserCheck, Trash2 } from 'lucide-react';
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { Add, MoreVert, Edit, Delete, Block } from '@mui/icons-material';
+import { PageHeader } from '@/components/common/page-header';
+import { DataTable, Column } from '@/components/common/data-table';
+
+// 샘플 데이터
+const users = [
+  {
+    id: '1',
+    name: '김철수',
+    email: 'kim@example.com',
+    phone: '010-1234-5678',
+    tier: 'GOLD',
+    status: 'active',
+    createdAt: '2024-01-15',
+    totalOrders: 45,
+    totalSpent: 3500000,
+  },
+  {
+    id: '2',
+    name: '이영희',
+    email: 'lee@example.com',
+    phone: '010-2345-6789',
+    tier: 'SILVER',
+    status: 'active',
+    createdAt: '2024-02-20',
+    totalOrders: 28,
+    totalSpent: 1800000,
+  },
+  {
+    id: '3',
+    name: '박민수',
+    email: 'park@example.com',
+    phone: '010-3456-7890',
+    tier: 'PLATINUM',
+    status: 'active',
+    createdAt: '2023-12-10',
+    totalOrders: 89,
+    totalSpent: 8200000,
+  },
+  {
+    id: '4',
+    name: '정수진',
+    email: 'jung@example.com',
+    phone: '010-4567-8901',
+    tier: 'BRONZE',
+    status: 'inactive',
+    createdAt: '2024-03-05',
+    totalOrders: 12,
+    totalSpent: 450000,
+  },
+];
 
 export default function UsersPage() {
-  const [page, setPage] = useState(1);
-  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ['users', page],
-    queryFn: async () => {
-      const response = await usersApi.getUsers({ page, limit: 20 });
-      return response;
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, user: any) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentUser(user);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setCurrentUser(null);
+  };
+
+  const columns: Column[] = [
+    {
+      id: 'name',
+      label: '사용자',
+      minWidth: 200,
+      sortable: true,
+      format: (value: string, row: any) => (
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Avatar sx={{ bgcolor: 'primary.main' }}>{value[0]}</Avatar>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {value}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.email}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
     },
-  });
-
-  const suspendMutation = useMutation({
-    mutationFn: (userId: string) => usersApi.updateUserStatus(userId, 'suspended'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    {
+      id: 'phone',
+      label: '연락처',
+      minWidth: 130,
     },
-  });
-
-  const activateMutation = useMutation({
-    mutationFn: (userId: string) => usersApi.updateUserStatus(userId, 'active'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    {
+      id: 'tier',
+      label: '등급',
+      minWidth: 100,
+      align: 'center',
+      format: (value: string) => {
+        const colors: any = {
+          PLATINUM: 'error',
+          GOLD: 'warning',
+          SILVER: 'info',
+          BRONZE: 'default',
+        };
+        return (
+          <Chip
+            label={value}
+            color={colors[value]}
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        );
+      },
     },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (userId: string) => usersApi.deleteUser(userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    {
+      id: 'totalOrders',
+      label: '주문수',
+      minWidth: 80,
+      align: 'center',
+      sortable: true,
     },
-  });
-
-  const handleSuspend = (userId: string) => {
-    if (confirm('이 사용자를 정지하시겠습니까?')) {
-      suspendMutation.mutate(userId);
-    }
-  };
-
-  const handleActivate = (userId: string) => {
-    if (confirm('이 사용자를 복구하시겠습니까?')) {
-      activateMutation.mutate(userId);
-    }
-  };
-
-  const handleDelete = (userId: string) => {
-    if (confirm('이 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      deleteMutation.mutate(userId);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge variant="success">활성</Badge>;
-      case 'suspended':
-        return <Badge variant="destructive">정지</Badge>;
-      case 'deleted':
-        return <Badge variant="secondary">삭제</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return <Badge variant="destructive">관리자</Badge>;
-      case 'seller':
-        return <Badge variant="warning">판매자</Badge>;
-      case 'user':
-        return <Badge variant="default">사용자</Badge>;
-      default:
-        return <Badge>{role}</Badge>;
-    }
-  };
-
-  if (isLoading) {
-    return <div className="p-8">로딩 중...</div>;
-  }
+    {
+      id: 'totalSpent',
+      label: '총 구매액',
+      minWidth: 130,
+      align: 'right',
+      sortable: true,
+      format: (value: number) => `₩${value.toLocaleString()}`,
+    },
+    {
+      id: 'status',
+      label: '상태',
+      minWidth: 100,
+      align: 'center',
+      format: (value: string) => (
+        <Chip
+          label={value === 'active' ? '활성' : '비활성'}
+          color={value === 'active' ? 'success' : 'default'}
+          size="small"
+        />
+      ),
+    },
+    {
+      id: 'createdAt',
+      label: '가입일',
+      minWidth: 120,
+      sortable: true,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">사용자 관리</h1>
-          <p className="text-gray-500 mt-2">전체 사용자를 관리합니다</p>
-        </div>
-      </div>
+    <Box>
+      <PageHeader
+        title="사용자 관리"
+        subtitle="전체 사용자를 관리하고 모니터링하세요"
+        breadcrumbs={[
+          { label: '홈', href: '/dashboard' },
+          { label: '사용자 관리' },
+        ]}
+        action={{
+          label: '사용자 추가',
+          onClick: () => console.log('Add user'),
+          icon: <Add />,
+        }}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>사용자 목록</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>이름</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>역할</TableHead>
-                <TableHead>등급</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>가입일</TableHead>
-                <TableHead className="text-right">작업</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users?.data?.map((user: User) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{getRoleBadge(user.role)}</TableCell>
-                  <TableCell>
-                    {user.grade ? (
-                      <Badge variant="secondary">{user.grade.toUpperCase()}</Badge>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(user.status)}</TableCell>
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString('ko-KR')}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    {user.status === 'active' ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleSuspend(user.id)}
-                      >
-                        <UserX className="h-4 w-4 mr-1" />
-                        정지
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleActivate(user.id)}
-                      >
-                        <UserCheck className="h-4 w-4 mr-1" />
-                        복구
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      삭제
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      <DataTable
+        columns={columns}
+        rows={users}
+        selectable
+        selected={selected}
+        onSelectionChange={setSelected}
+        onRowClick={(row) => console.log('Row clicked:', row)}
+        actions={(row) => (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMenuOpen(e, row);
+            }}
+          >
+            <MoreVert />
+          </IconButton>
+        )}
+      />
 
-          {/* Pagination */}
-          {users?.meta && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-500">
-                총 {users.meta.total}명 중 {(page - 1) * 20 + 1}-
-                {Math.min(page * 20, users.meta.total)}명 표시
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                >
-                  이전
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= users.meta.totalPages}
-                >
-                  다음
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>
+          <Edit fontSize="small" sx={{ mr: 1 }} />
+          수정
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          <Block fontSize="small" sx={{ mr: 1 }} />
+          정지
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+          <Delete fontSize="small" sx={{ mr: 1 }} />
+          삭제
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 }
-

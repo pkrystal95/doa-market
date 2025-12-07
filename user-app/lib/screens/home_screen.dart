@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../models/product.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,12 +21,22 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
+      _loadWishlist();
     });
   }
 
   Future<void> _loadProducts() async {
     final productProvider = Provider.of<ProductProvider>(context, listen: false);
     await productProvider.fetchProducts();
+  }
+
+  Future<void> _loadWishlist() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
+
+    if (authProvider.isAuthenticated && authProvider.userId != null) {
+      await wishlistProvider.fetchWishlist(authProvider.userId!);
+    }
   }
 
   void _onItemTapped(int index) {
@@ -180,25 +191,86 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                ),
-                child: product.imageUrl != null
-                    ? Image.network(
-                        product.imageUrl!,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(Icons.image_not_supported, size: 50),
-                          );
-                        },
-                      )
-                    : const Center(
-                        child: Icon(Icons.shopping_bag, size: 50),
-                      ),
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    ),
+                    child: product.imageUrl != null
+                        ? Image.network(
+                            product.imageUrl!,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(Icons.image_not_supported, size: 50),
+                              );
+                            },
+                          )
+                        : const Center(
+                            child: Icon(Icons.shopping_bag, size: 50),
+                          ),
+                  ),
+                  // 찜 버튼
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Consumer2<AuthProvider, WishlistProvider>(
+                      builder: (context, auth, wishlist, child) {
+                        final isInWishlist = wishlist.isInWishlist(product.id);
+                        
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              isInWishlist ? Icons.favorite : Icons.favorite_border,
+                              color: isInWishlist ? Colors.red : Colors.grey[600],
+                            ),
+                            iconSize: 20,
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(),
+                            onPressed: () async {
+                              if (!auth.isAuthenticated) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('로그인이 필요합니다')),
+                                );
+                                Navigator.of(context).pushNamed('/login');
+                                return;
+                              }
+
+                              final success = await wishlist.toggleWishlist(
+                                auth.userId!,
+                                product.id,
+                              );
+
+                              if (success && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isInWishlist ? '찜 목록에서 제거했습니다' : '찜 목록에 추가했습니다',
+                                    ),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(

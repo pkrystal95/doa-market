@@ -67,3 +67,5 @@ cdk.out/
 *.pid
 *.seed
 *.pid.lock
+
+**/Minimal_JavaScript_v7.0.0/**

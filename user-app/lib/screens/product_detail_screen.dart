@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/product.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -72,6 +74,48 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       appBar: AppBar(
         title: const Text('상품 상세'),
         actions: [
+          Consumer2<AuthProvider, WishlistProvider>(
+            builder: (context, auth, wishlist, child) {
+              if (!auth.isAuthenticated) {
+                return IconButton(
+                  icon: const Icon(Icons.favorite_border),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('로그인이 필요합니다')),
+                    );
+                    Navigator.of(context).pushNamed('/login');
+                  },
+                );
+              }
+
+              final isInWishlist = _product != null && wishlist.isInWishlist(_product!.id);
+
+              return IconButton(
+                icon: Icon(
+                  isInWishlist ? Icons.favorite : Icons.favorite_border,
+                  color: isInWishlist ? Colors.red : null,
+                ),
+                onPressed: _product == null
+                    ? null
+                    : () async {
+                        final success = await wishlist.toggleWishlist(
+                          auth.userId!,
+                          _product!.id,
+                        );
+                        if (success && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isInWishlist ? '찜 목록에서 제거했습니다' : '찜 목록에 추가했습니다',
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        }
+                      },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {

@@ -7,6 +7,7 @@ class ApiService {
   static const String userServiceUrl = 'http://localhost:3002/api/v1';
   static const String productServiceUrl = 'http://localhost:3003/api/v1';
   static const String orderServiceUrl = 'http://localhost:3004/api/v1';
+  static const String paymentServiceUrl = 'http://localhost:3006/api/v1';
   static const String cartServiceUrl = 'http://localhost:3005/api/v1';
   static const String sellerServiceUrl = 'http://localhost:3007/api/v1';
 
@@ -145,6 +146,80 @@ class ApiService {
         return json.decode(response.body);
       } else {
         throw Exception('주문 목록을 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 결제 준비 (KG Inicis)
+  Future<Map<String, dynamic>> preparePayment({
+    required String orderId,
+    required String userId,
+    required double amount,
+    required String productName,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$paymentServiceUrl/payments/prepare'),
+        headers: _getHeaders(),
+        body: json.encode({
+          'orderId': orderId,
+          'userId': userId,
+          'amount': amount,
+          'productName': productName,
+          'method': 'inicis',
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('결제 준비에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 결제 완료 처리
+  Future<Map<String, dynamic>> completePayment({
+    required String paymentId,
+    required String transactionId,
+    required String status,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$paymentServiceUrl/payments/$paymentId/complete'),
+        headers: _getHeaders(),
+        body: json.encode({
+          'transactionId': transactionId,
+          'status': status,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('결제 완료 처리에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 결제 조회
+  Future<Map<String, dynamic>> getPayment(String paymentId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$paymentServiceUrl/payments/$paymentId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('결제 정보를 불러오는데 실패했습니다');
       }
     } catch (e) {
       throw Exception('네트워크 오류: $e');

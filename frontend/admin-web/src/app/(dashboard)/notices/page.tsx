@@ -1,190 +1,247 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { noticesApi } from '@/lib/api';
-import { Notice } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Plus, Send, Edit, Trash2 } from 'lucide-react';
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { Add, MoreVert, Edit, Delete, PushPin, Visibility } from '@mui/icons-material';
+import { PageHeader } from '@/components/common/page-header';
+import { DataTable, Column } from '@/components/common/data-table';
+
+// 샘플 데이터
+const notices = [
+  {
+    id: '1',
+    title: '[중요] 설 연휴 배송 안내',
+    category: 'announcement',
+    author: '관리자',
+    views: 1250,
+    isPinned: true,
+    status: 'published',
+    createdAt: '2024-12-01 10:00',
+  },
+  {
+    id: '2',
+    title: '12월 정산 일정 변경 안내',
+    category: 'settlement',
+    author: '관리자',
+    views: 589,
+    isPinned: false,
+    status: 'published',
+    createdAt: '2024-11-28 14:30',
+  },
+  {
+    id: '3',
+    title: '신규 카테고리 추가 안내',
+    category: 'update',
+    author: '운영팀',
+    views: 342,
+    isPinned: false,
+    status: 'published',
+    createdAt: '2024-11-25 09:15',
+  },
+  {
+    id: '4',
+    title: '시스템 점검 예정 안내',
+    category: 'maintenance',
+    author: '기술팀',
+    views: 0,
+    isPinned: false,
+    status: 'draft',
+    createdAt: '2024-11-20 16:45',
+  },
+];
 
 export default function NoticesPage() {
-  const [page, setPage] = useState(1);
-  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<string[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [currentNotice, setCurrentNotice] = useState<any>(null);
 
-  const { data: notices, isLoading } = useQuery({
-    queryKey: ['notices', page],
-    queryFn: async () => {
-      const response = await noticesApi.getNotices({ page, limit: 20 });
-      return response;
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, notice: any) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentNotice(notice);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setCurrentNotice(null);
+  };
+
+  const columns: Column[] = [
+    {
+      id: 'title',
+      label: '제목',
+      minWidth: 350,
+      sortable: true,
+      format: (value: string, row: any) => (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          {row.isPinned && <PushPin sx={{ fontSize: 16, color: 'error.main' }} />}
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {value}
+          </Typography>
+        </Stack>
+      ),
     },
-  });
-
-  const publishMutation = useMutation({
-    mutationFn: (noticeId: string) => noticesApi.publishNotice(noticeId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notices'] });
+    {
+      id: 'category',
+      label: '카테고리',
+      minWidth: 120,
+      align: 'center',
+      format: (value: string) => {
+        const categoryMap: any = {
+          announcement: { label: '공지', color: 'primary' },
+          settlement: { label: '정산', color: 'warning' },
+          update: { label: '업데이트', color: 'info' },
+          maintenance: { label: '점검', color: 'error' },
+        };
+        const category = categoryMap[value] || categoryMap.announcement;
+        return (
+          <Chip
+            label={category.label}
+            color={category.color}
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        );
+      },
     },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (noticeId: string) => noticesApi.deleteNotice(noticeId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notices'] });
+    {
+      id: 'author',
+      label: '작성자',
+      minWidth: 100,
+      align: 'center',
     },
-  });
-
-  const handlePublish = (noticeId: string) => {
-    if (confirm('이 공지사항을 발행하시겠습니까?')) {
-      publishMutation.mutate(noticeId);
-    }
-  };
-
-  const handleDelete = (noticeId: string) => {
-    if (confirm('이 공지사항을 삭제하시겠습니까?')) {
-      deleteMutation.mutate(noticeId);
-    }
-  };
-
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case 'general':
-        return <Badge variant="default">일반</Badge>;
-      case 'maintenance':
-        return <Badge variant="warning">점검</Badge>;
-      case 'urgent':
-        return <Badge variant="destructive">긴급</Badge>;
-      default:
-        return <Badge>{type}</Badge>;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return <Badge variant="secondary">임시저장</Badge>;
-      case 'published':
-        return <Badge variant="success">발행됨</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  if (isLoading) {
-    return <div className="p-8">로딩 중...</div>;
-  }
+    {
+      id: 'views',
+      label: '조회수',
+      minWidth: 100,
+      align: 'center',
+      sortable: true,
+      format: (value: number) => value.toLocaleString(),
+    },
+    {
+      id: 'status',
+      label: '상태',
+      minWidth: 100,
+      align: 'center',
+      format: (value: string) => {
+        const statusMap: any = {
+          published: { label: '게시중', color: 'success' },
+          draft: { label: '임시저장', color: 'default' },
+        };
+        const status = statusMap[value] || statusMap.draft;
+        return (
+          <Chip
+            label={status.label}
+            color={status.color}
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        );
+      },
+    },
+    {
+      id: 'createdAt',
+      label: '작성일',
+      minWidth: 140,
+      sortable: true,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">공지사항 관리</h1>
-          <p className="text-gray-500 mt-2">시스템 공지사항을 관리합니다</p>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          공지사항 작성
-        </Button>
-      </div>
+    <Box>
+      <PageHeader
+        title="공지사항"
+        subtitle="공지사항을 작성하고 관리하세요"
+        breadcrumbs={[
+          { label: '홈', href: '/dashboard' },
+          { label: '공지사항' },
+        ]}
+        action={{
+          label: '공지 작성',
+          onClick: () => console.log('Create notice'),
+          icon: <Add />,
+        }}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>공지사항 목록</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>제목</TableHead>
-                <TableHead>유형</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>발행일</TableHead>
-                <TableHead>작성일</TableHead>
-                <TableHead className="text-right">작업</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {notices?.data?.map((notice: Notice) => (
-                <TableRow key={notice.id}>
-                  <TableCell className="font-medium">{notice.title}</TableCell>
-                  <TableCell>{getTypeBadge(notice.type)}</TableCell>
-                  <TableCell>{getStatusBadge(notice.status)}</TableCell>
-                  <TableCell>
-                    {notice.publishedAt
-                      ? new Date(notice.publishedAt).toLocaleDateString('ko-KR')
-                      : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    {notice.status === 'draft' && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handlePublish(notice.id)}
-                      >
-                        <Send className="h-4 w-4 mr-1" />
-                        발행
-                      </Button>
-                    )}
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4 mr-1" />
-                      수정
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(notice.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      삭제
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {/* 공지사항 통계 */}
+      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+        {[
+          { label: '전체 공지', count: 156, color: 'default' },
+          { label: '게시중', count: 145, color: 'success' },
+          { label: '임시저장', count: 11, color: 'default' },
+          { label: '고정 공지', count: 3, color: 'error' },
+        ].map((stat) => (
+          <Box
+            key={stat.label}
+            sx={{
+              flex: 1,
+              p: 2,
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              border: (theme) => `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              {stat.label}
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {stat.count}
+            </Typography>
+          </Box>
+        ))}
+      </Stack>
 
-          {/* Pagination */}
-          {notices?.meta && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-500">
-                총 {notices.meta.total}개 중 {(page - 1) * 20 + 1}-
-                {Math.min(page * 20, notices.meta.total)}개 표시
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                >
-                  이전
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= notices.meta.totalPages}
-                >
-                  다음
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+      <DataTable
+        columns={columns}
+        rows={notices}
+        selectable
+        selected={selected}
+        onSelectionChange={setSelected}
+        onRowClick={(row) => console.log('Row clicked:', row)}
+        actions={(row) => (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMenuOpen(e, row);
+            }}
+          >
+            <MoreVert />
+          </IconButton>
+        )}
+      />
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>
+          <Visibility fontSize="small" sx={{ mr: 1 }} />
+          미리보기
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          <Edit fontSize="small" sx={{ mr: 1 }} />
+          수정
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          <PushPin fontSize="small" sx={{ mr: 1 }} />
+          {currentNotice?.isPinned ? '고정 해제' : '상단 고정'}
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+          <Delete fontSize="small" sx={{ mr: 1 }} />
+          삭제
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 }
-
