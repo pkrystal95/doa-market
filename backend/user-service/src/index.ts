@@ -32,6 +32,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 app.use(`${API_PREFIX}/users`, userRoutes);
+app.use(`${API_PREFIX}/profiles`, userRoutes); // Alias for users
 app.use(`${API_PREFIX}/users/:userId/addresses`, addressRoutes);
 
 app.use(notFoundHandler);

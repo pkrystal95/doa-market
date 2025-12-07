@@ -45,8 +45,7 @@ app.get('/', (req, res) => {
       shipping: 'http://localhost:3011',
       coupons: 'http://localhost:3012',
       wishlist: 'http://localhost:3013',
-      analytics: 'http://localhost:3014',
-      admin: 'http://localhost:3015',
+      admin: 'http://localhost:3014',
     },
   });
 });
@@ -54,19 +53,19 @@ app.get('/', (req, res) => {
 const services = [
   { path: '/api/v1/auth', target: 'http://localhost:3001' },
   { path: '/api/v1/users', target: 'http://localhost:3002' },
+  { path: '/api/v1/profiles', target: 'http://localhost:3002' },
   { path: '/api/v1/products', target: 'http://localhost:3003' },
-  { path: '/api/v1/sellers', target: 'http://localhost:3004' },
-  { path: '/api/v1/orders', target: 'http://localhost:3005' },
-  { path: '/api/v1/payments', target: 'http://localhost:3006' },
-  { path: '/api/v1/carts', target: 'http://localhost:3007' },
-  { path: '/api/v1/reviews', target: 'http://localhost:3008' },
-  { path: '/api/v1/notifications', target: 'http://localhost:3009' },
-  { path: '/api/v1/search', target: 'http://localhost:3010' },
-  { path: '/api/v1/shipping', target: 'http://localhost:3011' },
-  { path: '/api/v1/coupons', target: 'http://localhost:3012' },
-  { path: '/api/v1/wishlist', target: 'http://localhost:3013' },
-  { path: '/api/v1/analytics', target: 'http://localhost:3014' },
-  { path: '/api/v1/admin', target: 'http://localhost:3015' },
+  { path: '/api/v1/orders', target: 'http://localhost:3004' },
+  { path: '/api/v1/payments', target: 'http://localhost:3005' },
+  { path: '/api/v1/shipping', target: 'http://localhost:3006' },
+  { path: '/api/v1/sellers', target: 'http://localhost:3007' },
+  { path: '/api/v1/settlements', target: 'http://localhost:3008' },
+  { path: '/api/v1/coupons', target: 'http://localhost:3009' },
+  { path: '/api/v1/inventory', target: 'http://localhost:3010' },
+  { path: '/api/v1/notifications', target: 'http://localhost:3011' },
+  { path: '/api/v1/reviews', target: 'http://localhost:3012' },
+  { path: '/api/v1/search', target: 'http://localhost:3013' },
+  { path: '/api/v1/admin', target: 'http://localhost:3014' },
 ];
 
 services.forEach(({ path, target }) => {

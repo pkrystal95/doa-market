@@ -1,0 +1,31 @@
+{
+  "name": "seller-frontend",
+  "version": "1.0.0",
+  "description": "DOA Market 판매자 대시보드",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "antd": "^5.22.6",
+    "@ant-design/icons": "^5.5.2",
+    "@tanstack/react-query": "^5.90.12",
+    "axios": "^1.13.2",
+    "dayjs": "^1.11.13",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-router-dom": "^7.10.1",
+    "vite": "^7.2.6"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,19 +1,89 @@
 {
   "info": {
-    "name": "DOA Market API Collection",
-    "_postman_id": "doa-market-api",
-    "description": "Complete API collection for DOA Market microservices",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "DOA Market - Complete Microservices API Collection",
+    "description": "Comprehensive Postman collection for all 16 microservices in the DOA Market system. All services use /api/v1/ as the base path.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
   },
   "variable": [
     {
-      "key": "base_url",
-      "value": "http://localhost:3003",
+      "key": "gateway_url",
+      "value": "http://localhost:3000",
       "type": "string"
     },
     {
       "key": "auth_url",
       "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "user_url",
+      "value": "http://localhost:3002",
+      "type": "string"
+    },
+    {
+      "key": "product_url",
+      "value": "http://localhost:3003",
+      "type": "string"
+    },
+    {
+      "key": "seller_url",
+      "value": "http://localhost:3004",
+      "type": "string"
+    },
+    {
+      "key": "order_url",
+      "value": "http://localhost:3005",
+      "type": "string"
+    },
+    {
+      "key": "payment_url",
+      "value": "http://localhost:3006",
+      "type": "string"
+    },
+    {
+      "key": "cart_url",
+      "value": "http://localhost:3007",
+      "type": "string"
+    },
+    {
+      "key": "review_url",
+      "value": "http://localhost:3008",
+      "type": "string"
+    },
+    {
+      "key": "notification_url",
+      "value": "http://localhost:3009",
+      "type": "string"
+    },
+    {
+      "key": "search_url",
+      "value": "http://localhost:3010",
+      "type": "string"
+    },
+    {
+      "key": "shipping_url",
+      "value": "http://localhost:3011",
+      "type": "string"
+    },
+    {
+      "key": "coupon_url",
+      "value": "http://localhost:3012",
+      "type": "string"
+    },
+    {
+      "key": "wishlist_url",
+      "value": "http://localhost:3013",
+      "type": "string"
+    },
+    {
+      "key": "analytics_url",
+      "value": "http://localhost:3014",
+      "type": "string"
+    },
+    {
+      "key": "admin_url",
+      "value": "http://localhost:3015",
       "type": "string"
     },
     {
@@ -29,22 +99,70 @@
   ],
   "item": [
     {
-      "name": "Authentication",
+      "name": "1. API Gateway",
       "item": [
         {
-          "name": "Register User",
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/health",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Gateway Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/info",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "info"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Auth Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/api/v1/health",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Register",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    const response = pm.response.json();",
-                  "    pm.environment.set('access_token', response.data.accessToken);",
-                  "    pm.environment.set('refresh_token', response.data.refreshToken);",
+                  "// Save tokens to collection variables",
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+                  "        console.log('Access token saved:', jsonData.data.accessToken);",
+                  "    }",
+                  "    if (jsonData.data && jsonData.data.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "        console.log('Refresh token saved:', jsonData.data.refreshToken);",
+                  "    }",
                   "}"
-                ],
-                "type": "text/javascript"
+                ]
               }
             }
           ],
@@ -58,15 +176,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"Test User\",\n  \"phoneNumber\": \"+821012345678\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"name\": \"John Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"role\": \"customer\"\n}"
             },
             "url": {
               "raw": "{{auth_url}}/api/v1/auth/register",
               "host": ["{{auth_url}}"],
               "path": ["api", "v1", "auth", "register"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Login",
@@ -74,15 +191,21 @@
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
+                  "// Save tokens to collection variables",
                   "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    pm.environment.set('access_token', response.data.accessToken);",
-                  "    pm.environment.set('refresh_token', response.data.refreshToken);",
-                  "    console.log('Access token saved:', response.data.accessToken);",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+                  "        console.log('Access token saved:', jsonData.data.accessToken);",
+                  "    }",
+                  "    if (jsonData.data && jsonData.data.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "        console.log('Refresh token saved:', jsonData.data.refreshToken);",
+                  "    }",
                   "}"
-                ],
-                "type": "text/javascript"
+                ]
               }
             }
           ],
@@ -96,15 +219,31 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
             },
             "url": {
               "raw": "{{auth_url}}/api/v1/auth/login",
               "host": ["{{auth_url}}"],
               "path": ["api", "v1", "auth", "login"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/api/v1/auth/me",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "v1", "auth", "me"]
+            }
+          }
         },
         {
           "name": "Refresh Token",
@@ -112,13 +251,21 @@
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
+                  "// Save new tokens to collection variables",
                   "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    pm.environment.set('access_token', response.data.accessToken);",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+                  "        console.log('Access token refreshed and saved');",
+                  "    }",
+                  "    if (jsonData.data && jsonData.data.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "        console.log('Refresh token updated and saved');",
+                  "    }",
                   "}"
-                ],
-                "type": "text/javascript"
+                ]
               }
             }
           ],
@@ -139,8 +286,7 @@
               "host": ["{{auth_url}}"],
               "path": ["api", "v1", "auth", "refresh"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Logout",
@@ -148,22 +294,37 @@
             "method": "POST",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
             "url": {
               "raw": "{{auth_url}}/api/v1/auth/logout",
               "host": ["{{auth_url}}"],
               "path": ["api", "v1", "auth", "logout"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/api/v1/auth/verify-email/{{user_id}}",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "v1", "auth", "verify-email", "{{user_id}}"]
+            }
+          }
         }
       ]
     },
     {
-      "name": "Products",
+      "name": "3. User Service",
       "item": [
         {
           "name": "Health Check",
@@ -171,12 +332,162 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/health",
-              "host": ["{{base_url}}"],
+              "raw": "{{user_url}}/api/v1/health",
+              "host": ["{{user_url}}"],
               "path": ["api", "v1", "health"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Get All Profiles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/api/v1/profiles?page=1&limit=10",
+              "host": ["{{user_url}}"],
+              "path": ["api", "v1", "profiles"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Profiles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/api/v1/profiles/search?q=john",
+              "host": ["{{user_url}}"],
+              "path": ["api", "v1", "profiles", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "john"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile by User ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/api/v1/profiles/{{user_id}}",
+              "host": ["{{user_url}}"],
+              "path": ["api", "v1", "profiles", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_001\",\n  \"name\": \"Jane Smith\",\n  \"phoneNumber\": \"+1234567890\",\n  \"address\": \"123 Main St, City, State 12345\",\n  \"avatar\": \"https://example.com/avatar.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{user_url}}/api/v1/profiles",
+              "host": ["{{user_url}}"],
+              "path": ["api", "v1", "profiles"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"phoneNumber\": \"+1234567890\",\n  \"address\": \"123 Main St, City, State 12345\",\n  \"avatar\": \"https://example.com/avatar.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{user_url}}/api/v1/profiles/{{user_id}}",
+              "host": ["{{user_url}}"],
+              "path": ["api", "v1", "profiles", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{user_url}}/api/v1/profiles/{{user_id}}",
+              "host": ["{{user_url}}"],
+              "path": ["api", "v1", "profiles", "{{user_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Product Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{product_url}}/api/v1/health",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
         },
         {
           "name": "Get All Products",
@@ -184,8 +495,8 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/products?page=1&limit=20",
-              "host": ["{{base_url}}"],
+              "raw": "{{product_url}}/api/v1/products?page=1&limit=20",
+              "host": ["{{product_url}}"],
               "path": ["api", "v1", "products"],
               "query": [
                 {
@@ -195,31 +506,36 @@
                 {
                   "key": "limit",
                   "value": "20"
-                },
-                {
-                  "key": "sort",
-                  "value": "createdAt:DESC",
-                  "disabled": true
-                },
-                {
-                  "key": "category",
-                  "value": "electronics",
-                  "disabled": true
-                },
-                {
-                  "key": "minPrice",
-                  "value": "10",
-                  "disabled": true
-                },
-                {
-                  "key": "maxPrice",
-                  "value": "100",
-                  "disabled": true
                 }
               ]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{product_url}}/api/v1/products/search?q=headphones&page=1&limit=10",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "products", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "headphones"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "Get Product by ID",
@@ -227,12 +543,23 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/products/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "products", "1"]
+              "raw": "{{product_url}}/api/v1/products/{{product_id}}",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Get Product by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{product_url}}/api/v1/products/slug/{{slug}}",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "products", "slug", "{{slug}}"]
+            }
+          }
         },
         {
           "name": "Create Product",
@@ -250,15 +577,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Premium Wireless Headphones\",\n  \"description\": \"High-quality wireless headphones with noise cancellation\",\n  \"price\": 199.99,\n  \"categoryId\": 1,\n  \"sellerId\": 1,\n  \"stock\": 50,\n  \"brand\": \"TechBrand\",\n  \"model\": \"WH-1000XM5\",\n  \"specifications\": {\n    \"color\": \"Black\",\n    \"weight\": \"250g\",\n    \"batteryLife\": \"30 hours\"\n  },\n  \"tags\": [\"electronics\", \"audio\", \"wireless\", \"noise-cancelling\"]\n}"
+              "raw": "{\n  \"name\": \"Wireless Headphones\",\n  \"description\": \"Premium noise-canceling wireless headphones\",\n  \"price\": 199.99,\n  \"category\": \"Electronics\",\n  \"sellerId\": \"seller_001\",\n  \"stock\": 50,\n  \"images\": [\"https://example.com/product1.jpg\"],\n  \"sku\": \"WH-001\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/products",
-              "host": ["{{base_url}}"],
+              "raw": "{{product_url}}/api/v1/products",
+              "host": ["{{product_url}}"],
               "path": ["api", "v1", "products"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Update Product",
@@ -276,15 +602,39 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Premium Wireless Headphones - Updated\",\n  \"price\": 179.99,\n  \"stock\": 75\n}"
+              "raw": "{\n  \"name\": \"Wireless Headphones Pro\",\n  \"description\": \"Premium noise-canceling wireless headphones with extended battery\",\n  \"price\": 249.99,\n  \"stock\": 45\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/products/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "products", "1"]
+              "raw": "{{product_url}}/api/v1/products/{{product_id}}",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Update Product Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{product_url}}/api/v1/products/{{product_id}}/status",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}", "status"]
+            }
+          }
         },
         {
           "name": "Delete Product",
@@ -297,99 +647,77 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/products/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "products", "1"]
+              "raw": "{{product_url}}/api/v1/products/{{product_id}}",
+              "host": ["{{product_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}"]
             }
-          },
-          "response": []
-        },
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Seller Service",
+      "item": [
         {
-          "name": "Search Products",
+          "name": "Health Check",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/products/search?q=headphones&page=1&limit=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "products", "search"],
+              "raw": "{{seller_url}}/api/v1/health",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Get All Sellers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers?page=1&limit=10",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers"],
               "query": [
-                {
-                  "key": "q",
-                  "value": "headphones"
-                },
                 {
                   "key": "page",
                   "value": "1"
                 },
                 {
                   "key": "limit",
-                  "value": "20"
+                  "value": "10"
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Get Products by Category",
+          "name": "Get Seller by ID",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/products/category/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "products", "category", "1"]
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Get Products by Seller",
+          "name": "Get Seller by User ID",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/products/seller/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "products", "seller", "1"]
+              "raw": "{{seller_url}}/api/v1/sellers/user/{{user_id}}",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "user", "{{user_id}}"]
             }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Categories",
-      "item": [
-        {
-          "name": "Get All Categories",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/categories",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "categories"]
-            }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Get Category by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/categories/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "categories", "1"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Create Category",
+          "name": "Create Seller",
           "request": {
             "method": "POST",
             "header": [
@@ -404,15 +732,1889 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Electronics\",\n  \"description\": \"Electronic devices and accessories\",\n  \"slug\": \"electronics\",\n  \"parentId\": null\n}"
+              "raw": "{\n  \"businessName\": \"Tech Electronics Store\",\n  \"description\": \"Premium electronics and gadgets\",\n  \"contactEmail\": \"seller@techstore.com\",\n  \"phoneNumber\": \"+1234567890\",\n  \"address\": \"456 Business Ave, City, State 67890\",\n  \"logo\": \"https://example.com/logo.png\",\n  \"rating\": 4.5\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/categories",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "categories"]
+              "raw": "{{seller_url}}/api/v1/sellers",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Update Seller",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Tech Electronics Store Premium\",\n  \"description\": \"Premium electronics and gadgets with fast shipping\",\n  \"phoneNumber\": \"+1234567890\",\n  \"rating\": 4.8\n}"
+            },
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}/approve",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}/reject",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}", "reject"]
+            }
+          }
+        },
+        {
+          "name": "Suspend Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}/suspend",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}", "suspend"]
+            }
+          }
+        },
+        {
+          "name": "Activate Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}/activate",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Update Seller Statistics",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalSales\": 1500,\n  \"totalOrders\": 50\n}"
+            },
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}/stats",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Delete Seller",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{seller_url}}/api/v1/sellers/{{seller_id}}",
+              "host": ["{{seller_url}}"],
+              "path": ["api", "v1", "sellers", "{{seller_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Order Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_url}}/api/v1/health",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_001\",\n  \"items\": [\n    {\n      \"productId\": \"product_001\",\n      \"quantity\": 2,\n      \"price\": 199.99\n    }\n  ],\n  \"shippingAddress\": \"123 Main St, City, State 12345\",\n  \"totalAmount\": 399.98,\n  \"couponCode\": \"SAVE10\"\n}"
+            },
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/{{order_id}}",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Orders by User ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/user/{{user_id}}?page=1&limit=10",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "user", "{{user_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Orders by Seller ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/seller/{{seller_id}}?page=1&limit=10",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "seller", "{{seller_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\"\n}"
+            },
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/{{order_id}}/status",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Update Payment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentStatus\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/{{order_id}}/payment",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "payment"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}"
+            },
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/{{order_id}}/cancel",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{order_url}}/api/v1/orders/{{order_id}}",
+              "host": ["{{order_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Payment Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{payment_url}}/api/v1/health",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"order_001\",\n  \"amount\": 399.98,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"credit_card\",\n  \"cardDetails\": {\n    \"cardNumber\": \"4532015112830366\",\n    \"expiryMonth\": 12,\n    \"expiryYear\": 2026,\n    \"cvv\": \"123\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{payment_url}}/api/v1/payments",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"txn_12345\"\n}"
+            },
+            "url": {
+              "raw": "{{payment_url}}/api/v1/payments/{{payment_id}}/process",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "payments", "{{payment_id}}", "process"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/v1/payments/{{payment_id}}",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "payments", "{{payment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/v1/payments/order/{{order_id}}",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "payments", "order", "{{order_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Customer requested cancellation\"\n}"
+            },
+            "url": {
+              "raw": "{{payment_url}}/api/v1/payments/{{payment_id}}/cancel",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "payments", "{{payment_id}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Refund Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Order cancelled\",\n  \"amount\": 399.98\n}"
+            },
+            "url": {
+              "raw": "{{payment_url}}/api/v1/payments/{{payment_id}}/refund",
+              "host": ["{{payment_url}}"],
+              "path": ["api", "v1", "payments", "{{payment_id}}", "refund"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Cart Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{cart_url}}/api/v1/health",
+              "host": ["{{cart_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{cart_url}}/api/v1/cart",
+              "host": ["{{cart_url}}"],
+              "path": ["api", "v1", "cart"]
+            }
+          }
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_001\",\n  \"quantity\": 2,\n  \"price\": 199.99\n}"
+            },
+            "url": {
+              "raw": "{{cart_url}}/api/v1/cart/items",
+              "host": ["{{cart_url}}"],
+              "path": ["api", "v1", "cart", "items"]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}"
+            },
+            "url": {
+              "raw": "{{cart_url}}/api/v1/cart/items/{{product_id}}",
+              "host": ["{{cart_url}}"],
+              "path": ["api", "v1", "cart", "items", "{{product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Remove Item from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{cart_url}}/api/v1/cart/items/{{product_id}}",
+              "host": ["{{cart_url}}"],
+              "path": ["api", "v1", "cart", "items", "{{product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{cart_url}}/api/v1/cart",
+              "host": ["{{cart_url}}"],
+              "path": ["api", "v1", "cart"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Review Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{review_url}}/api/v1/health",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_001\",\n  \"userId\": \"user_001\",\n  \"rating\": 5,\n  \"title\": \"Excellent headphones!\",\n  \"comment\": \"Great sound quality and comfortable to wear\",\n  \"images\": [\"https://example.com/review1.jpg\"]\n}"
+            },
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get All Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews?page=1&limit=20",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Review by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews/{{review_id}}",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews", "{{review_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Reviews by Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews/product/{{product_id}}?page=1&limit=10",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews", "product", "{{product_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reviews by User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews/user/{{user_id}}?page=1&limit=10",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews", "user", "{{user_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"title\": \"Very good headphones\",\n  \"comment\": \"Great sound quality but a bit pricey\"\n}"
+            },
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews/{{review_id}}",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews", "{{review_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{review_url}}/api/v1/reviews/{{review_id}}",
+              "host": ["{{review_url}}"],
+              "path": ["api", "v1", "reviews", "{{review_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Notification Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{notification_url}}/api/v1/health",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_001\",\n  \"type\": \"order_status\",\n  \"title\": \"Order Shipped\",\n  \"message\": \"Your order has been shipped\",\n  \"data\": {\n    \"orderId\": \"order_001\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{notification_url}}/api/v1/notifications",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "notifications"]
+            }
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_url}}/api/v1/notifications?page=1&limit=20",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notification by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_url}}/api/v1/notifications/{{notification_id}}",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isRead\": true\n}"
+            },
+            "url": {
+              "raw": "{{notification_url}}/api/v1/notifications/{{notification_id}}",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_url}}/api/v1/notifications/read-all",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notification_url}}/api/v1/notifications/{{notification_id}}",
+              "host": ["{{notification_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Search Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{search_url}}/api/v1/health",
+              "host": ["{{search_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{search_url}}/api/v1/search?q=headphones&filters=category:Electronics&page=1&limit=20",
+              "host": ["{{search_url}}"],
+              "path": ["api", "v1", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "headphones"
+                },
+                {
+                  "key": "filters",
+                  "value": "category:Electronics"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Advanced Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"headphones\",\n  \"filters\": {\n    \"category\": \"Electronics\",\n    \"priceMin\": 100,\n    \"priceMax\": 500,\n    \"rating\": 4\n  },\n  \"sort\": \"price_asc\",\n  \"page\": 1,\n  \"limit\": 20\n}"
+            },
+            "url": {
+              "raw": "{{search_url}}/api/v1/search/advanced",
+              "host": ["{{search_url}}"],
+              "path": ["api", "v1", "search", "advanced"]
+            }
+          }
+        },
+        {
+          "name": "Get Popular Keywords",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{search_url}}/api/v1/search/popular-keywords?limit=10",
+              "host": ["{{search_url}}"],
+              "path": ["api", "v1", "search", "popular-keywords"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Search History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{search_url}}/api/v1/search/history?limit=10",
+              "host": ["{{search_url}}"],
+              "path": ["api", "v1", "search", "history"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clear Search History",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{search_url}}/api/v1/search/history",
+              "host": ["{{search_url}}"],
+              "path": ["api", "v1", "search", "history"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Shipping Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/health",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Create Shipping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"order_001\",\n  \"userId\": \"user_001\",\n  \"address\": \"123 Main St, City, State 12345\",\n  \"carrier\": \"FedEx\",\n  \"estimatedDelivery\": \"2025-12-15\",\n  \"weight\": 2.5,\n  \"dimensions\": {\n    \"length\": 30,\n    \"width\": 20,\n    \"height\": 10\n  }\n}"
+            },
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/shipping",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "shipping"]
+            }
+          }
+        },
+        {
+          "name": "Get All Shipments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/shipping?page=1&limit=10",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "shipping"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shipping by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/shipping/{{shipping_id}}",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "shipping", "{{shipping_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Track Shipping",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/shipping/{{shipping_id}}/track",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "shipping", "{{shipping_id}}", "track"]
+            }
+          }
+        },
+        {
+          "name": "Update Shipping Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_transit\",\n  \"location\": \"Distribution Center, State\"\n}"
+            },
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/shipping/{{shipping_id}}/status",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "shipping", "{{shipping_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get User Shipments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{shipping_url}}/api/v1/shipping/user/{{user_id}}?page=1&limit=10",
+              "host": ["{{shipping_url}}"],
+              "path": ["api", "v1", "shipping", "user", "{{user_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Coupon Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/health",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SAVE10\",\n  \"discount\": 10,\n  \"discountType\": \"percentage\",\n  \"expiryDate\": \"2025-12-31\",\n  \"maxUses\": 100,\n  \"minOrderAmount\": 50,\n  \"applicableCategories\": [\"Electronics\", \"Fashion\"]\n}"
+            },
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons"]
+            }
+          }
+        },
+        {
+          "name": "Get All Coupons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons?page=1&limit=20",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Coupon by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons/{{coupon_id}}",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons", "{{coupon_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Coupon by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons/code/{{coupon_code}}",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons", "code", "{{coupon_code}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Coupon",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discount\": 15,\n  \"maxUses\": 150,\n  \"expiryDate\": \"2026-01-31\"\n}"
+            },
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons/{{coupon_id}}",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons", "{{coupon_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Coupon",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons/{{coupon_id}}",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons", "{{coupon_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Validate Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SAVE10\",\n  \"orderAmount\": 150\n}"
+            },
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons/validate",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"order_001\",\n  \"couponCode\": \"SAVE10\"\n}"
+            },
+            "url": {
+              "raw": "{{coupon_url}}/api/v1/coupons/apply",
+              "host": ["{{coupon_url}}"],
+              "path": ["api", "v1", "coupons", "apply"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Wishlist Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{wishlist_url}}/api/v1/health",
+              "host": ["{{wishlist_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Get User Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{wishlist_url}}/api/v1/wishlist?page=1&limit=20",
+              "host": ["{{wishlist_url}}"],
+              "path": ["api", "v1", "wishlist"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_001\"\n}"
+            },
+            "url": {
+              "raw": "{{wishlist_url}}/api/v1/wishlist",
+              "host": ["{{wishlist_url}}"],
+              "path": ["api", "v1", "wishlist"]
+            }
+          }
+        },
+        {
+          "name": "Check if in Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{wishlist_url}}/api/v1/wishlist/{{product_id}}/check",
+              "host": ["{{wishlist_url}}"],
+              "path": ["api", "v1", "wishlist", "{{product_id}}", "check"]
+            }
+          }
+        },
+        {
+          "name": "Remove from Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{wishlist_url}}/api/v1/wishlist/{{product_id}}",
+              "host": ["{{wishlist_url}}"],
+              "path": ["api", "v1", "wishlist", "{{product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Clear Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{wishlist_url}}/api/v1/wishlist",
+              "host": ["{{wishlist_url}}"],
+              "path": ["api", "v1", "wishlist"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Analytics Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/health",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Track Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_001\",\n  \"eventType\": \"product_viewed\",\n  \"productId\": \"product_001\",\n  \"metadata\": {\n    \"category\": \"Electronics\",\n    \"price\": 199.99\n  }\n}"
+            },
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/events",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "events"]
+            }
+          }
+        },
+        {
+          "name": "Get Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/events?eventType=product_viewed&page=1&limit=20",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "events"],
+              "query": [
+                {
+                  "key": "eventType",
+                  "value": "product_viewed"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/analytics/dashboard?period=30d",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "analytics", "dashboard"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Top Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/analytics/top-products?limit=10&period=7d",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "analytics", "top-products"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "period",
+                  "value": "7d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/analytics/user?userId={{user_id}}&period=30d",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "analytics", "user"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Sales Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{analytics_url}}/api/v1/analytics/sales?period=30d&groupBy=day",
+              "host": ["{{analytics_url}}"],
+              "path": ["api", "v1", "analytics", "sales"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Admin Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/health",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Log Admin Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminId\": \"admin_001\",\n  \"action\": \"user_suspended\",\n  \"targetId\": \"user_002\",\n  \"reason\": \"Violation of terms of service\",\n  \"metadata\": {\n    \"suspensionDays\": 7\n  }\n}"
+            },
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/logs",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "logs"]
+            }
+          }
+        },
+        {
+          "name": "Get Admin Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/logs?action=user_suspended&page=1&limit=20",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "logs"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "user_suspended"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get System Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/stats",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/stats/users?period=30d",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "stats", "users"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/stats/orders?period=30d",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "stats", "orders"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Revenue Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/stats/revenue?period=30d",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "stats", "revenue"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Suspend User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_002\",\n  \"reason\": \"Violation of terms of service\",\n  \"duration\": 7\n}"
+            },
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/users/{{user_id}}/suspend",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "users", "{{user_id}}", "suspend"]
+            }
+          }
+        },
+        {
+          "name": "Unsuspend User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{admin_url}}/api/v1/admin/users/{{user_id}}/unsuspend",
+              "host": ["{{admin_url}}"],
+              "path": ["api", "v1", "admin", "users", "{{user_id}}", "unsuspend"]
+            }
+          }
         }
       ]
     }

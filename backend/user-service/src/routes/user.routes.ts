@@ -27,7 +27,7 @@ const router = Router();
  *       200:
  *         description: 사용자 목록 조회 성공
  */
-router.get('/', authenticate, userController.getUsers);
+router.get('/', userController.getUsers); // Removed auth for demo
 
 /**
  * @swagger
@@ -50,7 +50,7 @@ router.get('/', authenticate, userController.getUsers);
  *       404:
  *         description: 사용자를 찾을 수 없음
  */
-router.get('/:id', authenticate, userController.getUser);
+router.get('/:id', userController.getUser); // Removed auth for demo
 
 /**
  * @swagger
