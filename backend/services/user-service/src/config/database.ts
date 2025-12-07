@@ -1,5 +1,7 @@
 import { DataSource } from 'typeorm';
 import { UserProfile } from '@models/UserProfile';
+import { UserTier, TierHistory } from '@models/UserTier';
+import { UserActivity, UserStatistics } from '@models/UserActivity';
 import logger from '@utils/logger';
 
 export const AppDataSource = new DataSource({
@@ -11,7 +13,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'doa_users',
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   logging: process.env.DB_LOGGING === 'true',
-  entities: [UserProfile],
+  entities: [UserProfile, UserTier, TierHistory, UserActivity, UserStatistics],
   subscribers: [],
   migrations: [],
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
