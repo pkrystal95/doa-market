@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AuthProvider with ChangeNotifier {
   bool _isAuthenticated = false;
   String? _userId;
   String? _token;
+  String? _userEmail;
 
   bool get isAuthenticated => _isAuthenticated;
   String? get userId => _userId;
   String? get token => _token;
+  String? get userEmail => _userEmail;
+
+  static const String apiGatewayUrl = 'http://localhost:3000/api/v1';
 
   AuthProvider() {
     _loadAuth();
@@ -18,30 +24,85 @@ class AuthProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
     _userId = prefs.getString('userId');
+    _userEmail = prefs.getString('userEmail');
     _isAuthenticated = _token != null;
     notifyListeners();
   }
 
   Future<void> login(String email, String password) async {
-    // TODO: API 호출하여 로그인
-    // 임시로 로컬 스토리지에 저장
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', 'temp_token');
-    await prefs.setString('userId', 'temp_user_id');
+    try {
+      final response = await http.post(
+        Uri.parse('$apiGatewayUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'password': password,
+        }),
+      );
 
-    _token = 'temp_token';
-    _userId = 'temp_user_id';
-    _isAuthenticated = true;
-    notifyListeners();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['success'] == true && data['data'] != null) {
+          final accessToken = data['data']['accessToken'];
+          final user = data['data']['user'];
+
+          // Save to local storage
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', accessToken);
+          await prefs.setString('userId', user['userId']);
+          await prefs.setString('userEmail', user['email']);
+
+          _token = accessToken;
+          _userId = user['userId'];
+          _userEmail = user['email'];
+          _isAuthenticated = true;
+          notifyListeners();
+        } else {
+          throw Exception('로그인 실패: 잘못된 응답 형식');
+        }
+      } else {
+        final error = json.decode(response.body);
+        throw Exception(error['message'] ?? '로그인에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('로그인 오류: $e');
+    }
+  }
+
+  Future<void> register(String email, String password, String name) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiGatewayUrl/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'password': password,
+          'name': name,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // 회원가입 성공 후 자동 로그인
+        await login(email, password);
+      } else {
+        final error = json.decode(response.body);
+        throw Exception(error['message'] ?? '회원가입에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('회원가입 오류: $e');
+    }
   }
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('userId');
+    await prefs.remove('userEmail');
 
     _token = null;
     _userId = null;
+    _userEmail = null;
     _isAuthenticated = false;
     notifyListeners();
   }

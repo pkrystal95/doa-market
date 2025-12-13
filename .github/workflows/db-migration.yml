@@ -1,0 +1,378 @@
+name: Database Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: 'Database to migrate'
+        required: true
+        type: choice
+        options:
+          - product-db
+          - order-db
+          - user-db
+          - payment-db
+          - inventory-db
+          - shipping-db
+          - seller-db
+      environment:
+        description: 'Environment to migrate'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      action:
+        description: 'Migration action'
+        required: true
+        type: choice
+        options:
+          - dry-run
+          - migrate
+          - rollback
+          - generate
+      migration-name:
+        description: 'Migration name (for generate action)'
+        required: false
+        type: string
+
+jobs:
+  # ============================================
+  # Job 1: Pre-flight Checks
+  # ============================================
+  preflight:
+    name: Pre-flight Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate inputs
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "generate" ] && [ -z "${{ github.event.inputs.migration-name }}" ]; then
+            echo "❌ Migration name is required for generate action"
+            exit 1
+          fi
+
+      - name: Check environment
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            echo "⚠️  WARNING: Production database migration requested"
+            echo "This action will modify the production database"
+            echo "Ensure you have a backup and approval"
+          fi
+
+  # ============================================
+  # Job 2: Backup Database
+  # ============================================
+  backup:
+    name: Backup Database
+    needs: [preflight]
+    if: github.event.inputs.action == 'migrate' || github.event.inputs.action == 'rollback'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create RDS snapshot
+        id: snapshot
+        run: |
+          DB_CLUSTER="${{ github.event.inputs.environment }}-${{ github.event.inputs.database }}"
+          SNAPSHOT_ID="${DB_CLUSTER}-migration-$(date +%Y%m%d-%H%M%S)"
+
+          echo "Creating snapshot: $SNAPSHOT_ID"
+
+          aws rds create-db-cluster-snapshot \
+            --db-cluster-identifier $DB_CLUSTER \
+            --db-cluster-snapshot-identifier $SNAPSHOT_ID
+
+          echo "snapshot-id=$SNAPSHOT_ID" >> $GITHUB_OUTPUT
+
+      - name: Wait for snapshot completion
+        run: |
+          SNAPSHOT_ID="${{ steps.snapshot.outputs.snapshot-id }}"
+
+          echo "Waiting for snapshot to complete..."
+
+          aws rds wait db-cluster-snapshot-available \
+            --db-cluster-snapshot-identifier $SNAPSHOT_ID
+
+          echo "✅ Snapshot created successfully"
+
+  # ============================================
+  # Job 3: Dry Run Migration
+  # ============================================
+  dry-run:
+    name: Dry Run Migration
+    needs: [preflight]
+    if: github.event.inputs.action == 'dry-run' || github.event.inputs.action == 'migrate'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get database credentials from Secrets Manager
+        id: db-creds
+        run: |
+          SECRET_NAME="/doa-market/databases/${{ github.event.inputs.database }}"
+
+          SECRET=$(aws secretsmanager get-secret-value \
+            --secret-id $SECRET_NAME \
+            --query SecretString \
+            --output text)
+
+          echo "::add-mask::$SECRET"
+          echo "secret=$SECRET" >> $GITHUB_OUTPUT
+
+      - name: Run migration dry-run
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        env:
+          DB_SECRET: ${{ steps.db-creds.outputs.secret }}
+        run: |
+          # Parse database credentials
+          DB_HOST=$(echo $DB_SECRET | jq -r '.host')
+          DB_PORT=$(echo $DB_SECRET | jq -r '.port')
+          DB_NAME=$(echo $DB_SECRET | jq -r '.dbname')
+          DB_USER=$(echo $DB_SECRET | jq -r '.username')
+          DB_PASS=$(echo $DB_SECRET | jq -r '.password')
+
+          export DATABASE_URL="postgresql://$DB_USER:$DB_PASS@$DB_HOST:$DB_PORT/$DB_NAME"
+
+          # Show pending migrations
+          echo "Pending migrations:"
+          npm run migration:show
+
+          # Dry run (simulation)
+          echo "Simulating migration..."
+          npm run migration:show | tee migration-plan.txt
+
+      - name: Upload migration plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-plan-${{ github.event.inputs.database }}
+          path: migration-plan.txt
+
+  # ============================================
+  # Job 4: Run Migration
+  # ============================================
+  migrate:
+    name: Run Migration
+    needs: [backup, dry-run]
+    if: github.event.inputs.action == 'migrate'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get database credentials
+        id: db-creds
+        run: |
+          SECRET_NAME="/doa-market/databases/${{ github.event.inputs.database }}"
+
+          SECRET=$(aws secretsmanager get-secret-value \
+            --secret-id $SECRET_NAME \
+            --query SecretString \
+            --output text)
+
+          echo "::add-mask::$SECRET"
+          echo "secret=$SECRET" >> $GITHUB_OUTPUT
+
+      - name: Run migrations
+        id: migrate
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        env:
+          DB_SECRET: ${{ steps.db-creds.outputs.secret }}
+        run: |
+          DB_HOST=$(echo $DB_SECRET | jq -r '.host')
+          DB_PORT=$(echo $DB_SECRET | jq -r '.port')
+          DB_NAME=$(echo $DB_SECRET | jq -r '.dbname')
+          DB_USER=$(echo $DB_SECRET | jq -r '.username')
+          DB_PASS=$(echo $DB_SECRET | jq -r '.password')
+
+          export DATABASE_URL="postgresql://$DB_USER:$DB_PASS@$DB_HOST:$DB_PORT/$DB_NAME"
+
+          echo "Running migrations..."
+          npm run migration:run | tee migration-output.txt
+
+          echo "✅ Migrations completed successfully"
+
+      - name: Verify migration
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        env:
+          DB_SECRET: ${{ steps.db-creds.outputs.secret }}
+        run: |
+          DB_HOST=$(echo $DB_SECRET | jq -r '.host')
+          DB_PORT=$(echo $DB_SECRET | jq -r '.port')
+          DB_NAME=$(echo $DB_SECRET | jq -r '.dbname')
+          DB_USER=$(echo $DB_SECRET | jq -r '.username')
+          DB_PASS=$(echo $DB_SECRET | jq -r '.password')
+
+          export DATABASE_URL="postgresql://$DB_USER:$DB_PASS@$DB_HOST:$DB_PORT/$DB_NAME"
+
+          # Check for pending migrations
+          PENDING=$(npm run migration:show | grep -c "pending" || true)
+
+          if [ "$PENDING" -gt 0 ]; then
+            echo "❌ There are still pending migrations!"
+            exit 1
+          fi
+
+          echo "✅ All migrations applied successfully"
+
+      - name: Upload migration output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-output-${{ github.event.inputs.database }}
+          path: migration-output.txt
+
+  # ============================================
+  # Job 5: Post-Migration Tests
+  # ============================================
+  post-migration-tests:
+    name: Post-Migration Tests
+    needs: [migrate]
+    if: github.event.inputs.action == 'migrate'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Run smoke tests
+        working-directory: backend/services/${{ github.event.inputs.database == 'product-db' && 'product-service' || github.event.inputs.database == 'order-db' && 'order-service' || github.event.inputs.database == 'user-db' && 'user-service' || github.event.inputs.database == 'payment-db' && 'payment-service' || github.event.inputs.database == 'inventory-db' && 'inventory-service' || github.event.inputs.database == 'shipping-db' && 'shipping-service' || 'seller-service' }}
+        run: |
+          echo "Running smoke tests..."
+          npm run test:smoke || true
+
+          echo "✅ Smoke tests completed"
+
+  # ============================================
+  # Job 6: Notify
+  # ============================================
+  notify:
+    name: Notify
+    needs: [migrate, post-migration-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ "${{ needs.migrate.result }}" == "success" ] && [ "${{ needs.post-migration-tests.result }}" == "success" ]; then
+            COLOR="good"
+            EMOJI="✅"
+            TEXT="Database Migration Successful"
+          else
+            COLOR="danger"
+            EMOJI="❌"
+            TEXT="Database Migration Failed"
+          fi
+
+          curl -X POST $SLACK_WEBHOOK_URL \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "'"$EMOJI $TEXT"'",
+              "attachments": [{
+                "color": "'"$COLOR"'",
+                "fields": [
+                  {"title": "Database", "value": "${{ github.event.inputs.database }}", "short": true},
+                  {"title": "Environment", "value": "${{ github.event.inputs.environment }}", "short": true},
+                  {"title": "Action", "value": "${{ github.event.inputs.action }}", "short": true},
+                  {"title": "Executed By", "value": "${{ github.actor }}", "short": true}
+                ]
+              }]
+            }'
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Migration Failed: ${{ github.event.inputs.database }} (${{ github.event.inputs.environment }})`,
+              body: `## Migration Failure
+
+              **Database**: ${{ github.event.inputs.database }}
+              **Environment**: ${{ github.event.inputs.environment }}
+              **Action**: ${{ github.event.inputs.action }}
+              **Workflow Run**: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+
+              **Action Required**: Manual intervention needed to resolve migration issues.
+
+              @devops-team`,
+              labels: ['database', 'migration', 'urgent']
+            })

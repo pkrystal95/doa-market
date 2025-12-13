@@ -50,6 +50,30 @@ services:
       - doa-network
 
   # ============================================
+  # RabbitMQ (Message Broker)
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: doa-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq123
+      RABBITMQ_DEFAULT_VHOST: doa-market
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - doa-network
+
+  # ============================================
   # LocalStack (AWS Services Emulator)
   # ============================================
   localstack:
@@ -106,11 +130,45 @@ services:
       - doa-network
 
   # ============================================
+  # API Gateway
+  # ============================================
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: doa-api-gateway
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: debug
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:5174
+      JWT_ACCESS_SECRET: dev-access-secret-change-in-production
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis123
+    ports:
+      - "3000:3000"
+    depends_on:
+      - jaeger
+      - redis
+    networks:
+      - doa-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # ============================================
   # Backend Services
   # ============================================
   auth-service:
     build:
-      context: ./backend/services/auth-service
+      context: ./backend/auth-service
       dockerfile: Dockerfile
     container_name: doa-auth-service
     environment:
@@ -159,7 +217,7 @@ services:
 
   product-service:
     build:
-      context: ./backend/services/product-service
+      context: ./backend/product-service
       dockerfile: Dockerfile
     container_name: doa-product-service
     environment:
@@ -175,6 +233,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: redis123
       OPENSEARCH_NODE: http://opensearch:9200
+      RABBITMQ_URL: amqp://rabbitmq:rabbitmq123@rabbitmq:5672/doa-market
       AWS_REGION: ap-northeast-2
       AWS_ENDPOINT: http://localstack:4566
       S3_BUCKET: doa-market-dev-products
@@ -184,6 +243,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - doa-network
@@ -322,8 +383,13 @@ services:
     container_name: doa-search-service
     environment:
       PORT: 3013
+      OPENSEARCH_NODE: http://opensearch:9200
+      RABBITMQ_URL: amqp://rabbitmq:rabbitmq123@rabbitmq:5672/doa-market
     ports:
       - "3013:3013"
+    depends_on:
+      - opensearch
+      - rabbitmq
     networks:
       - doa-network
 
@@ -374,6 +440,106 @@ services:
     networks:
       - doa-network
 
+  # ============================================
+  # Monitoring - Prometheus
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: doa-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  # ============================================
+  # Monitoring - Grafana
+  # ============================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: doa-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3333:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  # ============================================
+  # Distributed Tracing - Jaeger
+  # ============================================
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: doa-jaeger
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "5775:5775/udp"  # accept zipkin.thrift over compact thrift protocol
+      - "6831:6831/udp"  # accept jaeger.thrift over compact thrift protocol
+      - "6832:6832/udp"  # accept jaeger.thrift over binary thrift protocol
+      - "5778:5778"      # serve configs
+      - "16686:16686"    # serve frontend
+      - "14250:14250"    # accept model.proto
+      - "14268:14268"    # accept jaeger.thrift directly from clients
+      - "14269:14269"    # admin port: health check at / and metrics at /metrics
+      - "4317:4317"      # OTLP gRPC receiver
+      - "4318:4318"      # OTLP HTTP receiver
+      - "9411:9411"      # Zipkin compatible endpoint
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  # ============================================
+  # Logging - Loki
+  # ============================================
+  loki:
+    image: grafana/loki:latest
+    container_name: doa-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  # ============================================
+  # Logging - Promtail
+  # ============================================
+  promtail:
+    image: grafana/promtail:latest
+    container_name: doa-promtail
+    volumes:
+      - /var/log:/var/log
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - doa-network
+    restart: unless-stopped
+
 # ============================================
 # Volumes
 # ============================================
@@ -382,10 +548,18 @@ volumes:
     name: doa_postgres_data
   redis_data:
     name: doa_redis_data
+  rabbitmq_data:
+    name: doa_rabbitmq_data
   localstack_data:
     name: doa_localstack_data
   opensearch_data:
     name: doa_opensearch_data
+  prometheus_data:
+    name: doa_prometheus_data
+  grafana_data:
+    name: doa_grafana_data
+  loki_data:
+    name: doa_loki_data
 
 # ============================================
 # Networks

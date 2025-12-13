@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import bcrypt from 'bcryptjs';
 
-interface UserAttributes {
+export interface UserAttributes {
   id: string;
   email: string;
   password: string;

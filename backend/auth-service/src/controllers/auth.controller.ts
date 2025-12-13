@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import authService from '../services/auth.service';
+import authService, { RegisterDto, LoginDto } from '../services/auth.service';
 import { AppError } from '../utils/app-error';
 import { z } from 'zod';
 
@@ -25,7 +25,7 @@ export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       // Validate input
-      const validatedData = registerSchema.parse(req.body);
+      const validatedData = registerSchema.parse(req.body) as RegisterDto;
 
       // Register user
       const result = await authService.register(validatedData);
@@ -47,7 +47,7 @@ export class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       // Validate input
-      const validatedData = loginSchema.parse(req.body);
+      const validatedData = loginSchema.parse(req.body) as LoginDto;
 
       // Login user
       const result = await authService.login(validatedData);

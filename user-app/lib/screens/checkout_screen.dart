@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:html' as html;
-import 'dart:js' as js;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../services/api_service.dart';
@@ -35,41 +34,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _searchAddress() {
-    // Daum Postcode API 호출
-    js.context.callMethod('eval', ['''
-      new daum.Postcode({
-        oncomplete: function(data) {
-          var fullAddress = data.address;
-          var extraAddress = '';
+    if (!kIsWeb) {
+      // Mobile: Show a simple input dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('주소 검색'),
+          content: const Text('모바일에서는 수동으로 입력해주세요.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
-          if (data.addressType === 'R') {
-            if (data.bname !== '') {
-              extraAddress += data.bname;
-            }
-            if (data.buildingName !== '') {
-              extraAddress += (extraAddress !== '' ? ', ' + data.buildingName : data.buildingName);
-            }
-            fullAddress += (extraAddress !== '' ? ' (' + extraAddress + ')' : '');
-          }
-
-          window.postMessage({
-            type: 'daum_address',
-            zonecode: data.zonecode,
-            address: fullAddress
-          }, '*');
-        }
-      }).open();
-    ''']);
-
-    // postMessage 이벤트 리스너 등록
-    html.window.onMessage.listen((event) {
-      if (event.data is Map && event.data['type'] == 'daum_address') {
-        setState(() {
-          _zipcodeController.text = event.data['zonecode'];
-          _addressController.text = event.data['address'];
-        });
-      }
-    });
+    // Web-only code would go here
+    // For now, just show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('웹에서는 주소 검색 기능을 사용할 수 없습니다.')),
+    );
   }
 
   Future<void> _processCheckout() async {
@@ -153,16 +140,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _openPaymentWindow(Map<String, dynamic> paymentData) async {
-    // KG Inicis payment window parameters
-    final paymentUrl = paymentData['paymentUrl'] ?? 'https://mobile.inicis.com/smart/payment/';
-
-    // Open payment page in new window
-    html.window.open(
-      paymentUrl,
-      'KG Inicis Payment',
-      'width=500,height=600,scrollbars=yes',
-    );
-
     // Note: In production, you would handle the payment callback
     // For now, show a message
     if (mounted) {
@@ -171,7 +148,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         barrierDismissible: false,
         builder: (context) => AlertDialog(
           title: const Text('결제 진행 중'),
-          content: const Text('새 창에서 결제를 진행해주세요.\n결제 완료 후 이 화면으로 돌아옵니다.'),
+          content: Text(kIsWeb
+            ? '새 창에서 결제를 진행해주세요.\n결제 완료 후 이 화면으로 돌아옵니다.'
+            : '모바일 결제 페이지로 이동합니다.'),
           actions: [
             TextButton(
               onPressed: () {

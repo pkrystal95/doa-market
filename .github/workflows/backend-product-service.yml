@@ -1,0 +1,262 @@
+name: Backend - Product Service
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+    paths:
+      - 'backend/services/product-service/**'
+      - '.github/workflows/backend-product-service.yml'
+      - '.github/workflows/_reusable-*.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'backend/services/product-service/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      skip-tests:
+        description: 'Skip tests (use with caution)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  SERVICE_NAME: product-service
+  SERVICE_PATH: backend/services/product-service
+  ECR_REPOSITORY: doa-market/product-service
+
+jobs:
+  # ============================================
+  # Job 1: Run Tests
+  # ============================================
+  test:
+    name: Test
+    if: github.event.inputs.skip-tests != 'true'
+    uses: ./.github/workflows/_reusable-test.yml
+    with:
+      service-path: backend/services/product-service
+      node-version: '20'
+      run-unit-tests: true
+      run-integration-tests: true
+      run-e2e-tests: false
+      coverage-threshold: 80
+    secrets: inherit
+
+  # ============================================
+  # Job 2: Build and Push Docker Image
+  # ============================================
+  build:
+    name: Build
+    needs: [test]
+    if: |
+      always() &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+      github.event_name != 'pull_request'
+    strategy:
+      matrix:
+        environment:
+          - ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || 'development' }}
+    uses: ./.github/workflows/_reusable-build-and-push.yml
+    with:
+      service-name: product-service
+      service-path: backend/services/product-service
+      ecr-repository: doa-market/product-service
+      environment: ${{ matrix.environment }}
+    secrets:
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+  # ============================================
+  # Job 3: Deploy to Development
+  # ============================================
+  deploy-dev:
+    name: Deploy to Development
+    needs: [build]
+    if: |
+      github.ref != 'refs/heads/main' &&
+      github.ref != 'refs/heads/develop'
+    uses: ./.github/workflows/_reusable-deploy-ecs.yml
+    with:
+      service-name: product-service
+      cluster-name: doa-market-dev-cluster
+      task-definition-family: product-service-dev
+      container-name: product-service
+      image-uri: ${{ needs.build.outputs.image-uri }}
+      environment: development
+      deployment-type: ECS
+      wait-for-stability: true
+    secrets:
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================
+  # Job 4: Deploy to Staging
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [build]
+    if: github.ref == 'refs/heads/develop'
+    uses: ./.github/workflows/_reusable-deploy-ecs.yml
+    with:
+      service-name: product-service
+      cluster-name: doa-market-staging-cluster
+      task-definition-family: product-service-staging
+      container-name: product-service
+      image-uri: ${{ needs.build.outputs.image-uri }}
+      environment: staging
+      deployment-type: CODE_DEPLOY
+      wait-for-stability: true
+    secrets:
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================
+  # Job 5: Run E2E Tests on Staging
+  # ============================================
+  e2e-staging:
+    name: E2E Tests (Staging)
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: backend/services/product-service
+        run: npm ci
+
+      - name: Install Playwright
+        working-directory: backend/services/product-service
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: backend/services/product-service
+        env:
+          API_URL: https://staging.doamarket.com
+        run: npm run test:e2e
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-staging-results
+          path: backend/services/product-service/playwright-report/
+
+  # ============================================
+  # Job 6: Deploy to Production
+  # ============================================
+  deploy-production:
+    name: Deploy to Production
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/_reusable-deploy-ecs.yml
+    with:
+      service-name: product-service
+      cluster-name: doa-market-production-cluster
+      task-definition-family: product-service-production
+      container-name: product-service
+      image-uri: ${{ needs.build.outputs.image-uri }}
+      environment: production
+      deployment-type: CODE_DEPLOY
+      wait-for-stability: true
+    secrets:
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================
+  # Job 7: Post-Deployment Verification
+  # ============================================
+  verify-production:
+    name: Verify Production Deployment
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment to stabilize
+        run: sleep 300
+
+      - name: Health check
+        run: |
+          for i in {1..10}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://api.doamarket.com/api/v1/products/health)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          echo "❌ Health check failed"
+          exit 1
+
+      - name: Check CloudWatch metrics
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify error rates
+        run: |
+          END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S")
+          START_TIME=$(date -u -d '10 minutes ago' +"%Y-%m-%dT%H:%M:%S")
+
+          ERROR_COUNT=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/ApplicationELB \
+            --metric-name HTTPCode_Target_5XX_Count \
+            --dimensions Name=TargetGroup,Value=product-service-tg \
+            --start-time $START_TIME \
+            --end-time $END_TIME \
+            --period 600 \
+            --statistics Sum \
+            --query 'Datapoints[0].Sum' \
+            --output text)
+
+          if [ "$ERROR_COUNT" != "None" ] && [ $(echo "$ERROR_COUNT > 10" | bc) -eq 1 ]; then
+            echo "❌ High error count: $ERROR_COUNT"
+            exit 1
+          fi
+
+          echo "✅ Error rates are acceptable"
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: product-service-${{ github.sha }}
+          release_name: Product Service - ${{ github.sha }}
+          body: |
+            ## Deployment Summary
+
+            **Service**: Product Service
+            **Environment**: Production
+            **Commit**: ${{ github.sha }}
+            **Deployed by**: @${{ github.actor }}
+            **Image**: ${{ needs.build.outputs.image-uri }}
+
+            ## Changes
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false

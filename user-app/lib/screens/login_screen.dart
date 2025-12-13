@@ -14,6 +14,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _autoLogin = true;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -23,7 +26,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
+    setState(() {
+      _errorMessage = null;
+    });
+
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = '아이디 또는 비밀번호를 잘못 입력 하였습니다.';
+      });
       return;
     }
 
@@ -40,16 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('로그인 실패: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
         setState(() {
+          _errorMessage = '아이디 또는 비밀번호를 잘못 입력 하였습니다.';
           _isLoading = false;
         });
       }
@@ -58,105 +60,256 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryBlue = const Color(0xFF1D4ED8);
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 40),
+
+                // DOA Logo
+                Text(
+                  'DOA',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 64,
+                    fontWeight: FontWeight.w900,
+                    color: primaryBlue,
+                    letterSpacing: 2,
+                  ),
+                ),
+
                 const SizedBox(height: 60),
-                Icon(
-                  Icons.shopping_bag,
-                  size: 80,
-                  color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'DOA Market',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '로그인하여 시작하세요',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                ),
-                const SizedBox(height: 48),
-                TextFormField(
+
+                // Email Input
+                TextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: '이메일',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: '이메일을 입력해주세요.',
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                    ),
+                    filled: true,
+                    fillColor: isDark ? Colors.grey[700] : Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: primaryBlue),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.grey[200] : Colors.grey[900],
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '이메일을 입력해주세요';
-                    }
-                    if (!value.contains('@')) {
-                      return '올바른 이메일 형식이 아닙니다';
-                    }
-                    return null;
-                  },
                 ),
+
                 const SizedBox(height: 16),
-                TextFormField(
+
+                // Password Input
+                TextField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: '비밀번호',
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: '비밀번호를 입력해 주세요.',
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                    ),
+                    filled: true,
+                    fillColor: isDark ? Colors.grey[700] : Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: primaryBlue),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                        color: isDark ? Colors.grey[500] : Colors.grey[400],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                   ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '비밀번호를 입력해주세요';
-                    }
-                    if (value.length < 6) {
-                      return '비밀번호는 6자 이상이어야 합니다';
-                    }
-                    return null;
-                  },
+                  style: TextStyle(
+                    color: isDark ? Colors.grey[200] : Colors.grey[900],
+                  ),
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+
+                const SizedBox(height: 12),
+
+                // Error Message
+                if (_errorMessage != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text(
-                          '로그인',
-                          style: TextStyle(fontSize: 16),
+
+                const SizedBox(height: 12),
+
+                // Auto Login Checkbox
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Checkbox(
+                        value: _autoLogin,
+                        onChanged: (value) {
+                          setState(() {
+                            _autoLogin = value ?? false;
+                          });
+                        },
+                        activeColor: primaryBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '자동 로그인',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
+
+                const SizedBox(height: 24),
+
+                // Login Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            '로그인',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Links
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('계정이 없으신가요?'),
+                    TextButton(
+                      onPressed: () {
+                        // TODO: Navigate to find ID
+                      },
+                      child: Text(
+                        '아이디 찾기',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey[400] : Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '|',
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[600] : Colors.grey[300],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // TODO: Navigate to reset password
+                      },
+                      child: Text(
+                        '비밀번호 재설정',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey[400] : Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '|',
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[600] : Colors.grey[300],
+                      ),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pushNamed('/signup');
                       },
-                      child: const Text('회원가입'),
+                      child: Text(
+                        '회원가입',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey[400] : Colors.grey[500],
+                        ),
+                      ),
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 40),
               ],
             ),
           ),

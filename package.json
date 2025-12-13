@@ -1,4 +1,17 @@
 {
+  "name": "doa-market",
+  "version": "1.0.0",
+  "description": "DOA Market - 마이크로서비스 기반 전자상거래 플랫폼",
+  "scripts": {
+    "start:all": "./scripts/start-all-services.sh",
+    "stop:all": "./scripts/stop-all-services.sh",
+    "test": "./scripts/run-all-tests.sh",
+    "test:unit": "./scripts/run-unit-tests.sh",
+    "test:integration": "./scripts/run-integration-tests.sh",
+    "test:e2e": "./scripts/run-e2e-tests.sh",
+    "test:report": "./scripts/generate-test-report.sh",
+    "test:view": "./scripts/view-test-report.sh"
+  },
   "devDependencies": {
     "axios": "^1.13.2",
     "uuid": "^13.0.0"

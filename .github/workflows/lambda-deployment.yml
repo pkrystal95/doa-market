@@ -1,0 +1,403 @@
+name: Lambda - Functions Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'infrastructure/lambda/**'
+      - '.github/workflows/lambda-deployment.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'infrastructure/lambda/**'
+  workflow_dispatch:
+    inputs:
+      function-name:
+        description: 'Lambda function to deploy (or "all" for all functions)'
+        required: true
+        type: choice
+        options:
+          - all
+          - image-resize
+          - order-event-consumer
+          - payment-event-consumer
+          - notification-sender
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  # ============================================
+  # Job 1: Detect Changed Functions
+  # ============================================
+  detect-changes:
+    name: Detect Changed Functions
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
+    outputs:
+      functions: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check changed files
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            image-resize:
+              - 'infrastructure/lambda/image-resize/**'
+            order-event-consumer:
+              - 'infrastructure/lambda/order-event-consumer/**'
+            payment-event-consumer:
+              - 'infrastructure/lambda/payment-event-consumer/**'
+            notification-sender:
+              - 'infrastructure/lambda/notification-sender/**'
+
+  # ============================================
+  # Job 2: Build and Test Lambda Functions
+  # ============================================
+  build-test:
+    name: Build and Test - ${{ matrix.function }}
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.functions != '[]'
+    strategy:
+      matrix:
+        function:
+          - ${{ github.event.inputs.function-name == 'all' && fromJSON('["image-resize", "order-event-consumer", "payment-event-consumer", "notification-sender"]') || github.event.inputs.function-name || fromJSON(needs.detect-changes.outputs.functions) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: infrastructure/lambda/${{ matrix.function }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: infrastructure/lambda/${{ matrix.function }}
+        run: npm ci --production
+
+      - name: Run tests
+        working-directory: infrastructure/lambda/${{ matrix.function }}
+        run: |
+          npm ci
+          npm run test
+
+      - name: Package Lambda function
+        working-directory: infrastructure/lambda/${{ matrix.function }}
+        run: |
+          # 프로덕션 의존성만 설치
+          rm -rf node_modules
+          npm ci --production
+
+          # ZIP 패키지 생성
+          zip -r ${{ matrix.function }}.zip . -x "*.git*" "*.test.js" "*.spec.js" "tests/*"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-${{ matrix.function }}
+          path: infrastructure/lambda/${{ matrix.function }}/${{ matrix.function }}.zip
+          retention-days: 7
+
+  # ============================================
+  # Job 3: Deploy to Development
+  # ============================================
+  deploy-dev:
+    name: Deploy to Dev - ${{ matrix.function }}
+    needs: [build-test]
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'development')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        function:
+          - ${{ github.event.inputs.function-name == 'all' && fromJSON('["image-resize", "order-event-consumer", "payment-event-consumer", "notification-sender"]') || github.event.inputs.function-name || fromJSON(needs.detect-changes.outputs.functions) }}
+    environment:
+      name: development
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-${{ matrix.function }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload to S3
+        run: |
+          S3_BUCKET="doa-market-lambda-deployments"
+          S3_KEY="dev/${{ matrix.function }}/${{ github.sha }}.zip"
+
+          aws s3 cp ${{ matrix.function }}.zip s3://$S3_BUCKET/$S3_KEY
+
+          echo "s3-key=$S3_KEY" >> $GITHUB_OUTPUT
+
+      - name: Update Lambda function
+        run: |
+          FUNCTION_NAME="doa-market-dev-${{ matrix.function }}"
+
+          aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --s3-bucket doa-market-lambda-deployments \
+            --s3-key dev/${{ matrix.function }}/${{ github.sha }}.zip \
+            --publish
+
+      - name: Wait for function update
+        run: |
+          FUNCTION_NAME="doa-market-dev-${{ matrix.function }}"
+
+          aws lambda wait function-updated \
+            --function-name $FUNCTION_NAME
+
+      - name: Update function configuration
+        run: |
+          FUNCTION_NAME="doa-market-dev-${{ matrix.function }}"
+
+          aws lambda update-function-configuration \
+            --function-name $FUNCTION_NAME \
+            --environment "Variables={NODE_ENV=development,LOG_LEVEL=debug}"
+
+      - name: Test function invocation
+        run: |
+          FUNCTION_NAME="doa-market-dev-${{ matrix.function }}"
+
+          aws lambda invoke \
+            --function-name $FUNCTION_NAME \
+            --payload '{"test": true}' \
+            --cli-binary-format raw-in-base64-out \
+            response.json
+
+          cat response.json
+
+  # ============================================
+  # Job 4: Deploy to Staging
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging - ${{ matrix.function }}
+    needs: [build-test]
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        function:
+          - ${{ github.event.inputs.function-name == 'all' && fromJSON('["image-resize", "order-event-consumer", "payment-event-consumer", "notification-sender"]') || github.event.inputs.function-name || fromJSON(needs.detect-changes.outputs.functions) }}
+    environment:
+      name: staging
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-${{ matrix.function }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload to S3
+        run: |
+          S3_BUCKET="doa-market-lambda-deployments"
+          S3_KEY="staging/${{ matrix.function }}/${{ github.sha }}.zip"
+
+          aws s3 cp ${{ matrix.function }}.zip s3://$S3_BUCKET/$S3_KEY
+
+      - name: Update Lambda function code
+        run: |
+          FUNCTION_NAME="doa-market-staging-${{ matrix.function }}"
+
+          VERSION=$(aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --s3-bucket doa-market-lambda-deployments \
+            --s3-key staging/${{ matrix.function }}/${{ github.sha }}.zip \
+            --publish \
+            --query 'Version' \
+            --output text)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update alias to new version
+        run: |
+          FUNCTION_NAME="doa-market-staging-${{ matrix.function }}"
+          VERSION=${{ steps.update-code.outputs.version }}
+
+          aws lambda update-alias \
+            --function-name $FUNCTION_NAME \
+            --name staging \
+            --function-version $VERSION
+
+  # ============================================
+  # Job 5: Deploy to Production (Blue/Green)
+  # ============================================
+  deploy-production:
+    name: Deploy to Production - ${{ matrix.function }}
+    needs: [build-test]
+    if: |
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        function:
+          - ${{ github.event.inputs.function-name == 'all' && fromJSON('["image-resize", "order-event-consumer", "payment-event-consumer", "notification-sender"]') || github.event.inputs.function-name || fromJSON(needs.detect-changes.outputs.functions) }}
+    environment:
+      name: production
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-${{ matrix.function }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload to S3
+        run: |
+          S3_BUCKET="doa-market-lambda-deployments"
+          S3_KEY="production/${{ matrix.function }}/${{ github.sha }}.zip"
+
+          aws s3 cp ${{ matrix.function }}.zip s3://$S3_BUCKET/$S3_KEY
+
+      - name: Publish new version
+        id: publish
+        run: |
+          FUNCTION_NAME="doa-market-prod-${{ matrix.function }}"
+
+          VERSION=$(aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --s3-bucket doa-market-lambda-deployments \
+            --s3-key production/${{ matrix.function }}/${{ github.sha }}.zip \
+            --publish \
+            --query 'Version' \
+            --output text)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Gradual traffic shift (Canary)
+        run: |
+          FUNCTION_NAME="doa-market-prod-${{ matrix.function }}"
+          NEW_VERSION=${{ steps.publish.outputs.version }}
+
+          # Get current version
+          CURRENT_VERSION=$(aws lambda get-alias \
+            --function-name $FUNCTION_NAME \
+            --name production \
+            --query 'FunctionVersion' \
+            --output text)
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "New version: $NEW_VERSION"
+
+          # Step 1: 10% traffic to new version
+          echo "Shifting 10% traffic to new version..."
+          aws lambda update-alias \
+            --function-name $FUNCTION_NAME \
+            --name production \
+            --function-version $NEW_VERSION \
+            --routing-config "AdditionalVersionWeights={$CURRENT_VERSION=0.9}"
+
+          sleep 300  # Wait 5 minutes
+
+          # Check metrics
+          ERROR_RATE=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/Lambda \
+            --metric-name Errors \
+            --dimensions Name=FunctionName,Value=$FUNCTION_NAME \
+            --start-time $(date -u -d '5 minutes ago' +%Y-%m-%dT%H:%M:%S) \
+            --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+            --period 300 \
+            --statistics Sum \
+            --query 'Datapoints[0].Sum' \
+            --output text)
+
+          if [ "$ERROR_RATE" != "None" ] && [ $(echo "$ERROR_RATE > 5" | bc) -eq 1 ]; then
+            echo "❌ High error rate detected, rolling back..."
+            aws lambda update-alias \
+              --function-name $FUNCTION_NAME \
+              --name production \
+              --function-version $CURRENT_VERSION
+            exit 1
+          fi
+
+          # Step 2: 50% traffic
+          echo "Shifting 50% traffic to new version..."
+          aws lambda update-alias \
+            --function-name $FUNCTION_NAME \
+            --name production \
+            --function-version $NEW_VERSION \
+            --routing-config "AdditionalVersionWeights={$CURRENT_VERSION=0.5}"
+
+          sleep 300  # Wait 5 minutes
+
+          # Step 3: 100% traffic
+          echo "Shifting 100% traffic to new version..."
+          aws lambda update-alias \
+            --function-name $FUNCTION_NAME \
+            --name production \
+            --function-version $NEW_VERSION
+
+          echo "✅ Deployment completed successfully"
+
+      - name: Notify Slack
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            COLOR="good"
+            EMOJI="✅"
+            TEXT="Lambda Deployment Successful"
+          else
+            COLOR="danger"
+            EMOJI="❌"
+            TEXT="Lambda Deployment Failed"
+          fi
+
+          curl -X POST $SLACK_WEBHOOK_URL \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "'"$EMOJI $TEXT"'",
+              "attachments": [{
+                "color": "'"$COLOR"'",
+                "fields": [
+                  {"title": "Function", "value": "${{ matrix.function }}", "short": true},
+                  {"title": "Environment", "value": "production", "short": true},
+                  {"title": "Version", "value": "${{ steps.publish.outputs.version }}", "short": true},
+                  {"title": "Deployed By", "value": "${{ github.actor }}", "short": true}
+                ]
+              }]
+            }'

@@ -1,0 +1,256 @@
+name: Reusable - Run Tests
+
+on:
+  workflow_call:
+    inputs:
+      service-path:
+        required: true
+        type: string
+        description: 'Path to service directory'
+      node-version:
+        required: false
+        type: string
+        default: '20'
+        description: 'Node.js version'
+      run-unit-tests:
+        required: false
+        type: boolean
+        default: true
+      run-integration-tests:
+        required: false
+        type: boolean
+        default: true
+      run-e2e-tests:
+        required: false
+        type: boolean
+        default: false
+      coverage-threshold:
+        required: false
+        type: number
+        default: 80
+        description: 'Minimum code coverage percentage'
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.service-path }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.service-path }}
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ${{ inputs.service-path }}
+        run: npm run lint
+
+      - name: Run Prettier check
+        working-directory: ${{ inputs.service-path }}
+        run: npm run format:check
+
+      - name: TypeScript type check
+        working-directory: ${{ inputs.service-path }}
+        run: npm run type-check
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    if: inputs.run-unit-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.service-path }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.service-path }}
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: ${{ inputs.service-path }}
+        run: npm run test:unit -- --coverage --coverageReporters=json-summary --coverageReporters=lcov
+
+      - name: Check coverage threshold
+        working-directory: ${{ inputs.service-path }}
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo "Code coverage: $COVERAGE%"
+
+          if (( $(echo "$COVERAGE < ${{ inputs.coverage-threshold }}" | bc -l) )); then
+            echo "❌ Coverage $COVERAGE% is below threshold ${{ inputs.coverage-threshold }}%"
+            exit 1
+          fi
+
+          echo "✅ Coverage meets threshold"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ${{ inputs.service-path }}/coverage/lcov.info
+          flags: unittests
+          name: unit-tests
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    if: inputs.run-integration-tests
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.service-path }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.service-path }}
+        run: npm ci
+
+      - name: Run database migrations
+        working-directory: ${{ inputs.service-path }}
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        run: npm run migration:run
+
+      - name: Run integration tests
+        working-directory: ${{ inputs.service-path }}
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+        run: npm run test:integration
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: ${{ inputs.service-path }}/test-results/
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    if: inputs.run-e2e-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.service-path }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.service-path }}
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: ${{ inputs.service-path }}
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: ${{ inputs.service-path }}
+        env:
+          API_URL: ${{ vars.E2E_API_URL }}
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: ${{ inputs.service-path }}/playwright-report/
+          retention-days: 30
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=${{ inputs.service-path }}/package.json
+
+      - name: Run npm audit
+        working-directory: ${{ inputs.service-path }}
+        run: |
+          npm audit --audit-level=moderate || true
+          npm audit --audit-level=high
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONARQUBE_URL }}
+        with:
+          projectBaseDir: ${{ inputs.service-path }}
+          args: >
+            -Dsonar.projectKey=${{ github.repository }}-${{ inputs.service-path }}
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}

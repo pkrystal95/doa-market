@@ -2,14 +2,17 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // 마이크로서비스 엔드포인트
-  static const String authServiceUrl = 'http://localhost:3001/api/v1';
-  static const String userServiceUrl = 'http://localhost:3002/api/v1';
-  static const String productServiceUrl = 'http://localhost:3003/api/v1';
-  static const String orderServiceUrl = 'http://localhost:3004/api/v1';
-  static const String paymentServiceUrl = 'http://localhost:3006/api/v1';
-  static const String cartServiceUrl = 'http://localhost:3005/api/v1';
-  static const String sellerServiceUrl = 'http://localhost:3007/api/v1';
+  // API Gateway - 모든 요청이 단일 엔드포인트를 통과
+  static const String baseUrl = 'http://localhost:3000/api/v1';
+
+  // 하위 호환성을 위한 개별 서비스 URL (모두 API Gateway를 가리킴)
+  static const String authServiceUrl = '$baseUrl/auth';
+  static const String userServiceUrl = '$baseUrl/users';
+  static const String productServiceUrl = '$baseUrl/products';
+  static const String orderServiceUrl = '$baseUrl/orders';
+  static const String paymentServiceUrl = '$baseUrl/payments';
+  static const String cartServiceUrl = '$baseUrl/carts';
+  static const String sellerServiceUrl = '$baseUrl/sellers';
 
   String? _token;
 

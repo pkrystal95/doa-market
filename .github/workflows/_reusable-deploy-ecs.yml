@@ -1,0 +1,251 @@
+name: Reusable - Deploy to ECS
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+        description: 'ECS service name'
+      cluster-name:
+        required: true
+        type: string
+        description: 'ECS cluster name'
+      task-definition-family:
+        required: true
+        type: string
+        description: 'Task definition family name'
+      container-name:
+        required: true
+        type: string
+        description: 'Container name in task definition'
+      image-uri:
+        required: true
+        type: string
+        description: 'Docker image URI to deploy'
+      environment:
+        required: true
+        type: string
+        description: 'Deployment environment'
+      deployment-type:
+        required: false
+        type: string
+        default: 'ECS'
+        description: 'Deployment type: ECS (rolling) or CODE_DEPLOY (blue/green)'
+      wait-for-stability:
+        required: false
+        type: boolean
+        default: true
+        description: 'Wait for service to stabilize'
+    secrets:
+      AWS_ROLE_TO_ASSUME:
+        required: true
+      AWS_REGION:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://${{ inputs.environment }}.doamarket.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Download task definition
+        id: download-task-def
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ inputs.task-definition-family }} \
+            --query taskDefinition > task-definition.json
+
+          echo "Task definition downloaded"
+          cat task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ inputs.container-name }}
+          image: ${{ inputs.image-uri }}
+          environment-variables: |
+            NODE_ENV=${{ inputs.environment }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            LOG_LEVEL=${{ inputs.environment == 'production' && 'info' || 'debug' }}
+
+      - name: Deploy to Amazon ECS (Rolling Update)
+        if: inputs.deployment-type == 'ECS'
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ inputs.service-name }}
+          cluster: ${{ inputs.cluster-name }}
+          wait-for-service-stability: ${{ inputs.wait-for-stability }}
+          wait-for-minutes: 15
+
+      - name: Deploy to Amazon ECS (Blue/Green via CodeDeploy)
+        if: inputs.deployment-type == 'CODE_DEPLOY'
+        run: |
+          # Register new task definition
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://${{ steps.task-def.outputs.task-definition }} \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "New task definition: $TASK_DEF_ARN"
+
+          # Get CodeDeploy application and deployment group
+          APP_NAME="${{ inputs.service-name }}-app"
+          DEPLOY_GROUP="${{ inputs.service-name }}-deploy-group"
+
+          # Create AppSpec for CodeDeploy
+          cat > appspec.json <<EOF
+          {
+            "version": 0.0,
+            "Resources": [
+              {
+                "TargetService": {
+                  "Type": "AWS::ECS::Service",
+                  "Properties": {
+                    "TaskDefinition": "$TASK_DEF_ARN",
+                    "LoadBalancerInfo": {
+                      "ContainerName": "${{ inputs.container-name }}",
+                      "ContainerPort": 3000
+                    }
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+
+          # Create deployment
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name $APP_NAME \
+            --deployment-group-name $DEPLOY_GROUP \
+            --revision '{"revisionType":"AppSpecContent","appSpecContent":{"content":"'"$(cat appspec.json | jq -c .)"'"}}' \
+            --query 'deploymentId' \
+            --output text)
+
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "deployment-id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+
+          # Wait for deployment to complete
+          aws deploy wait deployment-successful --deployment-id $DEPLOYMENT_ID
+
+      - name: Run smoke tests
+        id: smoke-tests
+        run: |
+          SERVICE_URL="https://${{ inputs.environment }}.doamarket.com/api/v1/health"
+
+          echo "Running smoke tests against: $SERVICE_URL"
+
+          for i in {1..10}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL)
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Smoke test passed (attempt $i)"
+              exit 0
+            fi
+
+            echo "⏳ Waiting for service to be ready (attempt $i)..."
+            sleep 10
+          done
+
+          echo "❌ Smoke tests failed after 10 attempts"
+          exit 1
+
+      - name: Verify deployment metrics
+        if: inputs.environment == 'production'
+        run: |
+          # Wait 5 minutes to collect metrics
+          echo "Waiting 5 minutes to collect metrics..."
+          sleep 300
+
+          # Check CloudWatch metrics
+          END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S")
+          START_TIME=$(date -u -d '10 minutes ago' +"%Y-%m-%dT%H:%M:%S")
+
+          # Check 5xx error rate
+          ERROR_RATE=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/ApplicationELB \
+            --metric-name HTTPCode_Target_5XX_Count \
+            --dimensions Name=Service,Value=${{ inputs.service-name }} \
+            --start-time $START_TIME \
+            --end-time $END_TIME \
+            --period 300 \
+            --statistics Sum \
+            --query 'Datapoints[0].Sum' \
+            --output text)
+
+          if [ "$ERROR_RATE" != "None" ] && [ $(echo "$ERROR_RATE > 10" | bc) -eq 1 ]; then
+            echo "❌ High error rate detected: $ERROR_RATE"
+            exit 1
+          fi
+
+          echo "✅ Deployment metrics look good"
+
+      - name: Notify Slack - Success
+        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "✅ Deployment Successful",
+              "attachments": [{
+                "color": "good",
+                "fields": [
+                  {"title": "Service", "value": "${{ inputs.service-name }}", "short": true},
+                  {"title": "Environment", "value": "${{ inputs.environment }}", "short": true},
+                  {"title": "Image", "value": "${{ inputs.image-uri }}", "short": false},
+                  {"title": "Deployed By", "value": "${{ github.actor }}", "short": true},
+                  {"title": "Commit", "value": "${{ github.sha }}", "short": true}
+                ]
+              }]
+            }'
+
+      - name: Notify Slack - Failure
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "❌ Deployment Failed",
+              "attachments": [{
+                "color": "danger",
+                "fields": [
+                  {"title": "Service", "value": "${{ inputs.service-name }}", "short": true},
+                  {"title": "Environment", "value": "${{ inputs.environment }}", "short": true},
+                  {"title": "Deployed By", "value": "${{ github.actor }}", "short": true},
+                  {"title": "Action", "value": "Manual intervention required", "short": false}
+                ]
+              }]
+            }'
+
+      - name: Rollback on failure
+        if: failure() && inputs.deployment-type == 'CODE_DEPLOY'
+        run: |
+          echo "🔄 Initiating automatic rollback..."
+
+          DEPLOYMENT_ID=${{ steps.deploy-codedeploy.outputs.deployment-id }}
+
+          aws deploy stop-deployment \
+            --deployment-id $DEPLOYMENT_ID \
+            --auto-rollback-enabled
+
+          echo "✅ Rollback initiated"

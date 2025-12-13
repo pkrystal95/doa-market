@@ -1,4 +1,4 @@
-import User from '../models/user.model';
+import User, { UserAttributes } from '../models/user.model';
 import RefreshToken from '../models/refresh-token.model';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken, getTokenExpirationDate, TokenPayload } from '../utils/jwt';
 import { AppError } from '../utils/app-error';
@@ -18,7 +18,7 @@ export interface LoginDto {
 }
 
 export class AuthService {
-  async register(data: RegisterDto) {
+  async register(data: RegisterDto): Promise<{ user: Omit<UserAttributes, 'password'>; accessToken: string; refreshToken: string }> {
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email: data.email } });
     if (existingUser) {
@@ -62,7 +62,7 @@ export class AuthService {
     };
   }
 
-  async login(data: LoginDto) {
+  async login(data: LoginDto): Promise<{ user: Omit<UserAttributes, 'password'>; accessToken: string; refreshToken: string }> {
     // Find user
     const user = await User.findOne({ where: { email: data.email } });
     if (!user) {
@@ -180,7 +180,7 @@ export class AuthService {
     logger.info(`User logged out: ${userId}`);
   }
 
-  async getMe(userId: string) {
+  async getMe(userId: string): Promise<Omit<UserAttributes, 'password'>> {
     const user = await User.findByPk(userId);
     if (!user) {
       throw new AppError('User not found', 404);

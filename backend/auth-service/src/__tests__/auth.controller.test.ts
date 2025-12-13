@@ -2,6 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import authRoutes from '../routes/auth.routes';
 import authService from '../services/auth.service';
+import { errorHandler } from '../middleware/error-handler';
 
 // Mock auth service
 jest.mock('../services/auth.service');
@@ -9,6 +10,7 @@ jest.mock('../services/auth.service');
 const app = express();
 app.use(express.json());
 app.use('/api/v1/auth', authRoutes);
+app.use(errorHandler);
 
 describe('Auth Controller', () => {
   describe('POST /api/v1/auth/register', () => {
@@ -48,6 +50,8 @@ describe('Auth Controller', () => {
         });
 
       expect(response.status).toBe(400);
+      // 에러 응답 확인 (success 또는 error 필드)
+      expect(response.body).toHaveProperty('success');
       expect(response.body.success).toBe(false);
     });
 
@@ -61,6 +65,8 @@ describe('Auth Controller', () => {
         });
 
       expect(response.status).toBe(400);
+      // 에러 응답 확인 (success 또는 error 필드)
+      expect(response.body).toHaveProperty('success');
       expect(response.body.success).toBe(false);
     });
   });

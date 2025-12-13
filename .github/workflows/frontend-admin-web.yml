@@ -1,0 +1,288 @@
+name: Frontend - Admin Web
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+    paths:
+      - 'frontend/admin-web/**'
+      - '.github/workflows/frontend-admin-web.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'frontend/admin-web/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  SERVICE_NAME: admin-web
+  SERVICE_PATH: frontend/admin-web
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================
+  # Job 1: Lint and Test
+  # ============================================
+  test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.SERVICE_PATH }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm run lint
+
+      - name: Run type check
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm run type-check
+
+      - name: Run unit tests
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm run test -- --coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ${{ env.SERVICE_PATH }}/coverage/lcov.info
+          flags: admin-web
+
+  # ============================================
+  # Job 2: Build
+  # ============================================
+  build:
+    name: Build
+    needs: [test]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || 'development' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.SERVICE_PATH }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm ci
+
+      - name: Set environment variables
+        run: |
+          if [ "${{ matrix.environment }}" == "production" ]; then
+            echo "NEXT_PUBLIC_API_URL=https://api.doamarket.com" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_ENV=production" >> $GITHUB_ENV
+          elif [ "${{ matrix.environment }}" == "staging" ]; then
+            echo "NEXT_PUBLIC_API_URL=https://staging-api.doamarket.com" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_ENV=staging" >> $GITHUB_ENV
+          else
+            echo "NEXT_PUBLIC_API_URL=https://dev-api.doamarket.com" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_ENV=development" >> $GITHUB_ENV
+          fi
+
+      - name: Build Next.js app
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm run build
+
+      - name: Export static files
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          # Next.js standalone 빌드 사용
+          mkdir -p dist
+          cp -r .next/standalone/* dist/
+          cp -r .next/static dist/.next/static
+          cp -r public dist/public
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-web-build-${{ matrix.environment }}
+          path: ${{ env.SERVICE_PATH }}/dist
+          retention-days: 7
+
+  # ============================================
+  # Job 3: Deploy to S3 and CloudFront
+  # ============================================
+  deploy:
+    name: Deploy to ${{ matrix.environment }}
+    needs: [build]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        environment:
+          - ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || 'development' }}
+    environment:
+      name: ${{ matrix.environment }}
+      url: https://${{ matrix.environment == 'production' && 'admin' || matrix.environment }}-admin.doamarket.com
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: admin-web-build-${{ matrix.environment }}
+          path: dist
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set S3 bucket name
+        run: |
+          if [ "${{ matrix.environment }}" == "production" ]; then
+            echo "S3_BUCKET=doa-market-admin-web-prod" >> $GITHUB_ENV
+            echo "CLOUDFRONT_ID=${{ secrets.CLOUDFRONT_ADMIN_PROD_ID }}" >> $GITHUB_ENV
+          elif [ "${{ matrix.environment }}" == "staging" ]; then
+            echo "S3_BUCKET=doa-market-admin-web-staging" >> $GITHUB_ENV
+            echo "CLOUDFRONT_ID=${{ secrets.CLOUDFRONT_ADMIN_STAGING_ID }}" >> $GITHUB_ENV
+          else
+            echo "S3_BUCKET=doa-market-admin-web-dev" >> $GITHUB_ENV
+            echo "CLOUDFRONT_ID=${{ secrets.CLOUDFRONT_ADMIN_DEV_ID }}" >> $GITHUB_ENV
+          fi
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "*.html" \
+            --exclude "service-worker.js"
+
+          # HTML 파일은 캐시하지 않음
+          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+            --exclude "*" \
+            --include "*.html" \
+            --include "service-worker.js" \
+            --cache-control "public,max-age=0,must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.CLOUDFRONT_ID }} \
+            --paths "/*"
+
+      - name: Verify deployment
+        run: |
+          sleep 30
+
+          if [ "${{ matrix.environment }}" == "production" ]; then
+            URL="https://admin.doamarket.com"
+          elif [ "${{ matrix.environment }}" == "staging" ]; then
+            URL="https://staging-admin.doamarket.com"
+          else
+            URL="https://dev-admin.doamarket.com"
+          fi
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Deployment verified: $URL"
+          else
+            echo "❌ Deployment verification failed: HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: Notify Slack
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            COLOR="good"
+            EMOJI="✅"
+            TEXT="Deployment Successful"
+          else
+            COLOR="danger"
+            EMOJI="❌"
+            TEXT="Deployment Failed"
+          fi
+
+          curl -X POST $SLACK_WEBHOOK_URL \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "'"$EMOJI $TEXT"'",
+              "attachments": [{
+                "color": "'"$COLOR"'",
+                "fields": [
+                  {"title": "Service", "value": "Admin Web", "short": true},
+                  {"title": "Environment", "value": "${{ matrix.environment }}", "short": true},
+                  {"title": "Commit", "value": "${{ github.sha }}", "short": true},
+                  {"title": "Deployed By", "value": "${{ github.actor }}", "short": true}
+                ]
+              }]
+            }'
+
+  # ============================================
+  # Job 4: E2E Tests (Production only)
+  # ============================================
+  e2e-tests:
+    name: E2E Tests
+    needs: [deploy]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npm ci
+
+      - name: Install Playwright
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: ${{ env.SERVICE_PATH }}
+        env:
+          BASE_URL: https://admin.doamarket.com
+          TEST_USER_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: npm run test:e2e
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: ${{ env.SERVICE_PATH }}/playwright-report/
