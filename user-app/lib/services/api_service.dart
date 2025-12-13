@@ -66,11 +66,11 @@ class ApiService {
     }
   }
 
-  // 장바구니 조회
-  Future<Map<String, dynamic>> getCart(String userId) async {
+  // 장바구니 조회 (새로운 cart-service 사용)
+  Future<Map<String, dynamic>> getCart() async {
     try {
       final response = await http.get(
-        Uri.parse('$cartServiceUrl/carts/$userId'),
+        Uri.parse('$baseUrl/cart'),
         headers: _getHeaders(),
       );
 
@@ -84,15 +84,14 @@ class ApiService {
     }
   }
 
-  // 장바구니에 상품 추가
+  // 장바구니에 상품 추가 (새로운 cart-service 사용)
   Future<Map<String, dynamic>> addToCart({
-    required String userId,
     required String productId,
     required int quantity,
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$cartServiceUrl/carts/$userId/items'),
+        Uri.parse('$baseUrl/cart'),
         headers: _getHeaders(),
         body: json.encode({
           'productId': productId,
@@ -104,6 +103,66 @@ class ApiService {
         return json.decode(response.body);
       } else {
         throw Exception('장바구니에 추가하는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 장바구니 아이템 수량 변경
+  Future<Map<String, dynamic>> updateCartItem({
+    required String cartItemId,
+    required int quantity,
+  }) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/cart/$cartItemId'),
+        headers: _getHeaders(),
+        body: json.encode({
+          'quantity': quantity,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('수량 변경에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 장바구니 아이템 삭제
+  Future<Map<String, dynamic>> removeCartItem(String cartItemId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/cart/$cartItemId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('삭제에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 장바구니 전체 비우기
+  Future<Map<String, dynamic>> clearCart() async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/cart'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('장바구니 비우기에 실패했습니다');
       }
     } catch (e) {
       throw Exception('네트워크 오류: $e');
@@ -223,6 +282,139 @@ class ApiService {
         return json.decode(response.body);
       } else {
         throw Exception('결제 정보를 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // ===== 주소 관리 API =====
+
+  // 주소 목록 조회
+  Future<Map<String, dynamic>> getAddresses(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/$userId/addresses'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('주소 목록을 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 주소 추가
+  Future<Map<String, dynamic>> createAddress({
+    required String userId,
+    required Map<String, dynamic> addressData,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/$userId/addresses'),
+        headers: _getHeaders(),
+        body: json.encode(addressData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('주소 추가에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 주소 수정
+  Future<Map<String, dynamic>> updateAddress({
+    required String userId,
+    required String addressId,
+    required Map<String, dynamic> addressData,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/users/$userId/addresses/$addressId'),
+        headers: _getHeaders(),
+        body: json.encode(addressData),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('주소 수정에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 주소 삭제
+  Future<Map<String, dynamic>> deleteAddress({
+    required String userId,
+    required String addressId,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/users/$userId/addresses/$addressId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('주소 삭제에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // ===== 카테고리 API =====
+
+  // 카테고리 목록 조회
+  Future<Map<String, dynamic>> getCategories({String? parentId}) async {
+    try {
+      String url = '$baseUrl/categories';
+      if (parentId != null) {
+        url += '?parentId=$parentId';
+      }
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('카테고리 목록을 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 카테고리별 상품 조회
+  Future<Map<String, dynamic>> getProductsByCategory({
+    required String categoryId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$productServiceUrl/products?categoryId=$categoryId&page=$page&limit=$limit'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('상품 목록을 불러오는데 실패했습니다');
       }
     } catch (e) {
       throw Exception('네트워크 오류: $e');

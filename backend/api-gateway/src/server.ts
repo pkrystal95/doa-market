@@ -124,6 +124,9 @@ const services: ServiceConfig[] = [
 
   // Stats service - auth required, admin or seller role
   { path: '/api/v1/stats', target: 'http://localhost:3016', auth: 'required', roles: ['admin', 'seller'] },
+
+  // Cart service - auth required
+  { path: '/api/v1/cart', target: 'http://localhost:3017', auth: 'required' },
 ];
 
 // Apply stricter rate limiting to auth endpoints

@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/database';
+import OrderItem from './order-item.model';
 
 class Order extends Model {
   public id!: string;
@@ -9,6 +10,7 @@ class Order extends Model {
   public status!: string;
   public totalAmount!: number;
   public paymentStatus!: string;
+  public shippingAddress?: any;
 }
 
 Order.init(
@@ -26,9 +28,25 @@ Order.init(
       type: DataTypes.ENUM('pending', 'completed', 'failed', 'refunded'),
       defaultValue: 'pending',
     },
+    shippingAddress: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
   },
   { sequelize, tableName: 'orders' }
 );
+
+// Define associations
+Order.hasMany(OrderItem, {
+  foreignKey: 'orderId',
+  as: 'items',
+  onDelete: 'CASCADE',
+});
+
+OrderItem.belongsTo(Order, {
+  foreignKey: 'orderId',
+  as: 'order',
+});
 
 export default Order;
 
