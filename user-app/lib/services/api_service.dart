@@ -438,4 +438,212 @@ class ApiService {
       throw Exception('네트워크 오류: $e');
     }
   }
+
+  // ===== 검색 API =====
+
+  // 상품 검색
+  Future<Map<String, dynamic>> searchProducts({
+    required String keyword,
+    Map<String, dynamic>? filters,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/search?keyword=$keyword'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('검색에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 인기 검색어 조회
+  Future<Map<String, dynamic>> getPopularKeywords({int limit = 10}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/search/popular?limit=$limit'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('인기 검색어를 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 검색 기록 조회
+  Future<Map<String, dynamic>> getSearchHistory(String userId, {int limit = 20}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/search/history/$userId?limit=$limit'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('검색 기록을 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // ===== 위시리스트 API =====
+
+  // 위시리스트에 추가
+  Future<Map<String, dynamic>> addToWishlist({
+    required String userId,
+    required String productId,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/wishlist'),
+        headers: _getHeaders(),
+        body: json.encode({
+          'userId': userId,
+          'productId': productId,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('위시리스트에 추가하는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 위시리스트에서 제거
+  Future<Map<String, dynamic>> removeFromWishlist({
+    required String userId,
+    required String productId,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/wishlist/$userId/$productId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('위시리스트에서 제거하는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 사용자 위시리스트 조회
+  Future<Map<String, dynamic>> getUserWishlist(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/wishlist/user/$userId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('위시리스트를 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 위시리스트 확인
+  Future<bool> checkInWishlist({
+    required String userId,
+    required String productId,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/wishlist/check/$userId/$productId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['data']['inWishlist'] ?? false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 위시리스트 개수 조회
+  Future<int> getWishlistCount(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/wishlist/count/$userId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['data']['count'] ?? 0;
+      } else {
+        return 0;
+      }
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // ===== 사용자 프로필 API =====
+
+  // 프로필 조회
+  Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/$userId/profile'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('프로필을 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 프로필 업데이트
+  Future<Map<String, dynamic>> updateUserProfile({
+    required String userId,
+    required Map<String, dynamic> profileData,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/users/$userId/profile'),
+        headers: _getHeaders(),
+        body: json.encode(profileData),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('프로필 업데이트에 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
 }

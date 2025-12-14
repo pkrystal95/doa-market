@@ -7,6 +7,10 @@ import 'providers/wishlist_provider.dart';
 import 'providers/category_provider.dart';
 import 'providers/address_provider.dart';
 import 'providers/order_provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/search_provider.dart';
+import 'providers/profile_provider.dart';
+import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -18,6 +22,8 @@ import 'screens/wishlist_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/address_management_screen.dart';
 import 'screens/order_history_screen.dart';
+import 'screens/search_screen.dart';
+import 'screens/profile_edit_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
@@ -37,60 +44,34 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => AddressProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
-      child: MaterialApp(
-        title: 'DOA Market',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            elevation: 0,
-          ),
-          textTheme: const TextTheme(
-            displayLarge: TextStyle(
-              fontFamily: 'SchoolSafetyRoundedSmile',
-              fontWeight: FontWeight.normal,
-            ),
-            displayMedium: TextStyle(
-              fontFamily: 'SchoolSafetyRoundedSmile',
-              fontWeight: FontWeight.normal,
-            ),
-            displaySmall: TextStyle(
-              fontFamily: 'SchoolSafetyRoundedSmile',
-              fontWeight: FontWeight.normal,
-            ),
-            headlineLarge: TextStyle(
-              fontFamily: 'SchoolSafetyRoundedSmile',
-              fontWeight: FontWeight.bold,
-            ),
-            headlineMedium: TextStyle(
-              fontFamily: 'SchoolSafetyRoundedSmile',
-              fontWeight: FontWeight.bold,
-            ),
-            headlineSmall: TextStyle(
-              fontFamily: 'SchoolSafetyRoundedSmile',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const SplashScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/signup': (context) => const SignupScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/product': (context) => const ProductDetailScreen(),
-          '/cart': (context) => const CartScreen(),
-          '/mypage': (context) => const MyPageScreen(),
-          '/wishlist': (context) => const WishlistScreen(),
-          '/checkout': (context) => const CheckoutScreen(),
-          '/addresses': (context) => const AddressManagementScreen(),
-          '/orders': (context) => const OrderHistoryScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'DOA Market',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            initialRoute: '/',
+            routes: {
+              '/': (context) => const SplashScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/signup': (context) => const SignupScreen(),
+              '/home': (context) => const HomeScreen(),
+              '/product': (context) => const ProductDetailScreen(),
+              '/cart': (context) => const CartScreen(),
+              '/mypage': (context) => const MyPageScreen(),
+              '/wishlist': (context) => const WishlistScreen(),
+              '/checkout': (context) => const CheckoutScreen(),
+              '/addresses': (context) => const AddressManagementScreen(),
+              '/orders': (context) => const OrderHistoryScreen(),
+              '/search': (context) => const SearchScreen(),
+              '/profile-edit': (context) => const ProfileEditScreen(),
+            },
+          );
         },
       ),
     );

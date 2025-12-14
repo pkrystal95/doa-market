@@ -117,12 +117,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
-                  // 프로필 편집 (추후 구현)
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('프로필 편집 기능은 준비 중입니다'),
-                    ),
-                  );
+                  Navigator.of(context).pushNamed('/profile-edit');
                 },
               ),
             ],

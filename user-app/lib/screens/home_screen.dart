@@ -5,8 +5,15 @@ import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/category_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/product.dart';
 import '../models/category.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/app_spacing.dart';
+import '../widgets/product_card.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/skeleton_loader.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,16 +62,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'DOA Market',
-          style: TextStyle(
-            fontFamily: 'SchoolSafetyRoundedSmile',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('DOA Market'),
         actions: [
+          // Search button
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/search');
+            },
+          ),
+          // Cart button with badge
           Stack(
             children: [
               IconButton(
@@ -77,13 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context, cart, child) {
                   if (cart.itemCount == 0) return const SizedBox.shrink();
                   return Positioned(
-                    right: 8,
-                    top: 8,
+                    right: AppSpacing.xs,
+                    top: AppSpacing.xs,
                     child: Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(AppSpacing.xxs),
                       decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
+                        color: AppColors.badge,
+                        borderRadius: AppSpacing.borderRadiusFull,
                       ),
                       constraints: const BoxConstraints(
                         minWidth: 16,
@@ -91,9 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Text(
                         '${cart.itemCount}',
-                        style: const TextStyle(
+                        style: AppTypography.labelSmall.copyWith(
                           color: Colors.white,
-                          fontSize: 10,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -103,6 +113,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+          // Theme toggle
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+          // Logout button
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -145,178 +169,99 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeTab() {
-    return Consumer<ProductProvider>(
-      builder: (context, productProvider, child) {
+    return Consumer3<ProductProvider, CartProvider, WishlistProvider>(
+      builder: (context, productProvider, cartProvider, wishlistProvider, child) {
         if (productProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return GridView.builder(
+            padding: AppSpacing.paddingMD,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
+            ),
+            itemCount: 6,
+            itemBuilder: (context, index) => const ProductCardSkeleton(),
+          );
         }
 
         if (productProvider.error != null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(productProvider.error!),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _loadProducts,
-                  child: const Text('다시 시도'),
-                ),
-              ],
-            ),
+          return EmptyState(
+            icon: Icons.error_outline,
+            title: '오류가 발생했습니다',
+            message: productProvider.error,
+            actionLabel: '다시 시도',
+            onAction: _loadProducts,
           );
         }
 
         if (productProvider.products.isEmpty) {
-          return const Center(
-            child: Text('등록된 상품이 없습니다'),
+          return const EmptyState(
+            icon: Icons.shopping_bag_outlined,
+            title: '등록된 상품이 없습니다',
+            message: '곧 새로운 상품이 추가될 예정입니다',
           );
         }
+
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
         return RefreshIndicator(
           onRefresh: _loadProducts,
           child: GridView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.paddingMD,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 0.7,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
             ),
             itemCount: productProvider.products.length,
             itemBuilder: (context, index) {
               final product = productProvider.products[index];
-              return _buildProductCard(product);
+              final isInWishlist = wishlistProvider.isInWishlist(product.id ?? '');
+
+              return ProductCard(
+                product: product,
+                isInWishlist: isInWishlist,
+                onTap: () {
+                  Navigator.of(context).pushNamed('/product', arguments: product.id);
+                },
+                onAddToCart: () async {
+                  try {
+                    await cartProvider.addItem(product, quantity: 1);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('장바구니에 추가되었습니다')),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('오류: $e')),
+                      );
+                    }
+                  }
+                },
+                onToggleWishlist: () async {
+                  if (!authProvider.isAuthenticated) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('로그인이 필요합니다')),
+                      );
+                    }
+                    return;
+                  }
+
+                  await wishlistProvider.toggleWishlist(
+                    authProvider.userId!,
+                    product.id!,
+                  );
+                },
+              );
             },
           ),
         );
       },
-    );
-  }
-
-  Widget _buildProductCard(Product product) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushNamed('/product', arguments: product.id);
-      },
-      child: Card(
-        elevation: 2,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                    ),
-                    child: product.imageUrl != null
-                        ? Image.network(
-                            product.imageUrl!,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Center(
-                                child: Icon(Icons.image_not_supported, size: 50),
-                              );
-                            },
-                          )
-                        : const Center(
-                            child: Icon(Icons.shopping_bag, size: 50),
-                          ),
-                  ),
-                  // 찜 버튼
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Consumer2<AuthProvider, WishlistProvider>(
-                      builder: (context, auth, wishlist, child) {
-                        final isInWishlist = wishlist.isInWishlist(product.id);
-                        
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.2),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              isInWishlist ? Icons.favorite : Icons.favorite_border,
-                              color: isInWishlist ? Colors.red : Colors.grey[600],
-                            ),
-                            iconSize: 20,
-                            padding: const EdgeInsets.all(8),
-                            constraints: const BoxConstraints(),
-                            onPressed: () async {
-                              if (!auth.isAuthenticated) {
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('로그인이 필요합니다')),
-                                );
-                                Navigator.of(context).pushNamed('/login');
-                                return;
-                              }
-
-                              final success = await wishlist.toggleWishlist(
-                                auth.userId!,
-                                product.id,
-                              );
-
-                              if (success && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      isInWishlist ? '찜 목록에서 제거했습니다' : '찜 목록에 추가했습니다',
-                                    ),
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -409,17 +354,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategoryProducts(CategoryProvider categoryProvider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final wishlistProvider = Provider.of<WishlistProvider>(context);
+
     return Column(
       children: [
         // 카테고리 헤더 (뒤로가기 버튼 포함)
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.paddingMD,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? AppColors.surfaceDark : AppColors.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: AppSpacing.elevationSM,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -435,9 +385,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Text(
                   categoryProvider.selectedCategory?.name ?? '카테고리',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -447,23 +396,74 @@ class _HomeScreenState extends State<HomeScreen> {
         // 카테고리별 상품 목록
         Expanded(
           child: categoryProvider.isLoadingProducts
-              ? const Center(child: CircularProgressIndicator())
+              ? GridView.builder(
+                  padding: AppSpacing.paddingMD,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: AppSpacing.md,
+                    mainAxisSpacing: AppSpacing.md,
+                  ),
+                  itemCount: 6,
+                  itemBuilder: (context, index) => const ProductCardSkeleton(),
+                )
               : categoryProvider.categoryProducts.isEmpty
-                  ? const Center(
-                      child: Text('이 카테고리에 상품이 없습니다'),
+                  ? const EmptyState(
+                      icon: Icons.category_outlined,
+                      title: '상품이 없습니다',
+                      message: '이 카테고리에 등록된 상품이 없습니다',
                     )
                   : GridView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppSpacing.paddingMD,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 0.7,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
+                        crossAxisSpacing: AppSpacing.md,
+                        mainAxisSpacing: AppSpacing.md,
                       ),
                       itemCount: categoryProvider.categoryProducts.length,
                       itemBuilder: (context, index) {
                         final product = categoryProvider.categoryProducts[index];
-                        return _buildProductCard(product);
+                        final isInWishlist = wishlistProvider.isInWishlist(product.id ?? '');
+
+                        return ProductCard(
+                          product: product,
+                          isInWishlist: isInWishlist,
+                          onTap: () {
+                            Navigator.of(context).pushNamed('/product', arguments: product.id);
+                          },
+                          onAddToCart: () async {
+                            try {
+                              await cartProvider.addItem(product, quantity: 1);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('장바구니에 추가되었습니다')),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('오류: $e')),
+                                );
+                              }
+                            }
+                          },
+                          onToggleWishlist: () async {
+                            if (!authProvider.isAuthenticated) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('로그인이 필요합니다')),
+                                );
+                              }
+                              return;
+                            }
+
+                            await wishlistProvider.toggleWishlist(
+                              authProvider.userId!,
+                              product.id!,
+                            );
+                          },
+                        );
                       },
                     ),
         ),
