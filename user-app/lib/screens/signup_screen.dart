@@ -91,6 +91,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   'DOA Market',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontFamily: 'SchoolSafetyRoundedSmile',
                         fontWeight: FontWeight.bold,
                       ),
                 ),

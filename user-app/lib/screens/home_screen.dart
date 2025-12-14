@@ -4,7 +4,9 @@ import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/wishlist_provider.dart';
+import '../providers/category_provider.dart';
 import '../models/product.dart';
+import '../models/category.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
       _loadWishlist();
+      _loadCategories();
     });
   }
 
@@ -39,6 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadCategories() async {
+    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+    await categoryProvider.fetchCategories();
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -49,7 +57,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DOA Market'),
+        title: const Text(
+          'DOA Market',
+          style: TextStyle(
+            fontFamily: 'SchoolSafetyRoundedSmile',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           Stack(
             children: [
@@ -227,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: Colors.black.withValues(alpha: 0.2),
                                 blurRadius: 4,
                               ),
                             ],
@@ -242,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             constraints: const BoxConstraints(),
                             onPressed: () async {
                               if (!auth.isAuthenticated) {
+                                if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('로그인이 필요합니다')),
                                 );
@@ -306,18 +321,153 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategoriesTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.category, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            '카테고리 기능은 준비 중입니다',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+    return Consumer<CategoryProvider>(
+      builder: (context, categoryProvider, child) {
+        if (categoryProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (categoryProvider.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(categoryProvider.error!),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loadCategories,
+                  child: const Text('다시 시도'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (categoryProvider.categories.isEmpty) {
+          return const Center(
+            child: Text('카테고리가 없습니다'),
+          );
+        }
+
+        // 카테고리별 상품이 선택된 경우
+        if (categoryProvider.selectedCategory != null) {
+          return _buildCategoryProducts(categoryProvider);
+        }
+
+        // 카테고리 목록 표시
+        return RefreshIndicator(
+          onRefresh: _loadCategories,
+          child: GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: categoryProvider.rootCategories.length,
+            itemBuilder: (context, index) {
+              final category = categoryProvider.rootCategories[index];
+              return _buildCategoryCard(category, categoryProvider);
+            },
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryCard(Category category, CategoryProvider categoryProvider) {
+    return GestureDetector(
+      onTap: () {
+        categoryProvider.selectCategory(category);
+      },
+      child: Card(
+        elevation: 2,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.category,
+              size: 50,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              category.name,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildCategoryProducts(CategoryProvider categoryProvider) {
+    return Column(
+      children: [
+        // 카테고리 헤더 (뒤로가기 버튼 포함)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  categoryProvider.selectCategory(null);
+                },
+              ),
+              Expanded(
+                child: Text(
+                  categoryProvider.selectedCategory?.name ?? '카테고리',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // 카테고리별 상품 목록
+        Expanded(
+          child: categoryProvider.isLoadingProducts
+              ? const Center(child: CircularProgressIndicator())
+              : categoryProvider.categoryProducts.isEmpty
+                  ? const Center(
+                      child: Text('이 카테고리에 상품이 없습니다'),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.7,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: categoryProvider.categoryProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = categoryProvider.categoryProducts[index];
+                        return _buildProductCard(product);
+                      },
+                    ),
+        ),
+      ],
     );
   }
 
@@ -335,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icon(
                     Icons.person_outline,
                     size: 100,
-                    color: Colors.grey[400],
+                    color: Colors.grey.shade400,
                   ),
                   const SizedBox(height: 24),
                   Text(

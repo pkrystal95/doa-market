@@ -25,10 +25,15 @@ export class AuthService {
       throw new AppError('Email already registered', 409);
     }
 
+    // Hash password before creating user
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(data.password, salt);
+
     // Create user
     const user = await User.create({
       email: data.email,
-      password: data.password,
+      password: hashedPassword,
       name: data.name,
       phone: data.phone,
       role: data.role || 'user',
@@ -36,13 +41,31 @@ export class AuthService {
       emailVerified: false,
     });
 
-    logger.info(`User registered: ${user.id}`);
+    // Get user ID - try multiple methods
+    let userId = user.id || user.getDataValue('id') || (user as any).dataValues?.id;
+    
+    if (!userId) {
+      // Reload user to ensure all fields are populated
+      await user.reload();
+      userId = user.id || user.getDataValue('id') || (user as any).dataValues?.id;
+    }
+    
+    if (!userId) {
+      logger.error('User ID is null after creation and reload', { user: user.toJSON() });
+      throw new AppError('Failed to create user', 500);
+    }
+    
+    logger.info(`User registered: ${userId}`);
+    
+    // Get user data
+    const userData = user.toJSON();
+    const finalUserId = userId || userData.id;
 
     // Generate tokens
     const payload: TokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
+      userId: finalUserId,
+      email: userData.email,
+      role: userData.role,
     };
 
     const accessToken = generateAccessToken(payload);
@@ -50,7 +73,7 @@ export class AuthService {
 
     // Save refresh token
     await RefreshToken.create({
-      userId: user.id,
+      userId: finalUserId,
       token: refreshToken,
       expiresAt: getTokenExpirationDate(process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
     });
@@ -63,12 +86,14 @@ export class AuthService {
   }
 
   async login(data: LoginDto): Promise<{ user: Omit<UserAttributes, 'password'>; accessToken: string; refreshToken: string }> {
-    // Find user
-    const user = await User.findOne({ where: { email: data.email } });
+    // Find user (password is included by default, but we need to ensure it's loaded)
+    const user = await User.findOne({ 
+      where: { email: data.email }
+    });
     if (!user) {
       throw new AppError('Invalid credentials', 401);
     }
-
+    
     // Check status
     if (user.status === 'suspended') {
       throw new AppError('Account suspended', 403);
@@ -78,8 +103,23 @@ export class AuthService {
     }
 
     // Verify password
-    const isPasswordValid = await user.comparePassword(data.password);
+    // Get password directly from dataValues to ensure it's available
+    const storedPassword = user.getDataValue('password');
+    if (!storedPassword) {
+      logger.error('Password not found for user', { email: data.email, userId: user.id });
+      throw new AppError('Invalid credentials', 401);
+    }
+    
+    // Use bcrypt directly to compare passwords
+    const bcrypt = require('bcryptjs');
+    const isPasswordValid = await bcrypt.compare(data.password, storedPassword);
     if (!isPasswordValid) {
+      logger.error('Password comparison failed', { 
+        email: data.email,
+        passwordLength: data.password?.length,
+        storedPasswordLength: storedPassword?.length,
+        storedPasswordPrefix: storedPassword?.substring(0, 10)
+      });
       throw new AppError('Invalid credentials', 401);
     }
 
@@ -87,13 +127,16 @@ export class AuthService {
     user.lastLoginAt = new Date();
     await user.save();
 
-    logger.info(`User logged in: ${user.id}`);
+    // Get user data (ensure id is available)
+    const userData = user.toJSON();
+    const finalUserId = userData.id || user.id || user.getDataValue('id');
+    logger.info(`User logged in: ${finalUserId}`);
 
     // Generate tokens
     const payload: TokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
+      userId: finalUserId,
+      email: userData.email,
+      role: userData.role,
     };
 
     const accessToken = generateAccessToken(payload);
@@ -101,13 +144,13 @@ export class AuthService {
 
     // Save refresh token
     await RefreshToken.create({
-      userId: user.id,
+      userId: finalUserId,
       token: refreshToken,
       expiresAt: getTokenExpirationDate(process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
     });
 
     return {
-      user: user.toJSON(),
+      user: userData,
       accessToken,
       refreshToken,
     };

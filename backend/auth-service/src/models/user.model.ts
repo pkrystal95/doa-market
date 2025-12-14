@@ -33,7 +33,11 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
   // Instance methods
   public async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.password);
+    const password = this.password || this.getDataValue('password') || (this as any).dataValues?.password;
+    if (!password) {
+      return false;
+    }
+    return bcrypt.compare(candidatePassword, password);
   }
 
   public toJSON(): Omit<UserAttributes, 'password'> {

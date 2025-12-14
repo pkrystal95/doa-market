@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/address_provider.dart';
+import '../models/address.dart';
 import '../services/api_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -22,6 +24,123 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _apiService = ApiService();
 
   bool _isProcessing = false;
+  Address? _selectedAddress;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAddresses();
+    });
+  }
+
+  Future<void> _loadAddresses() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final addressProvider = Provider.of<AddressProvider>(context, listen: false);
+
+    if (authProvider.isAuthenticated && authProvider.userId != null) {
+      await addressProvider.fetchAddresses(authProvider.userId!);
+      
+      // 기본 주소 자동 선택
+      if (addressProvider.defaultAddress != null) {
+        setState(() {
+          _selectedAddress = addressProvider.defaultAddress;
+          _fillAddressForm(_selectedAddress!);
+        });
+      }
+    }
+  }
+
+  void _fillAddressForm(Address address) {
+    _nameController.text = address.recipientName;
+    _phoneController.text = address.phone;
+    _zipcodeController.text = address.zipCode;
+    _addressController.text = address.address;
+    _detailAddressController.text = address.addressDetail ?? '';
+  }
+
+  void _selectAddress() {
+    final addressProvider = Provider.of<AddressProvider>(context, listen: false);
+    
+    if (addressProvider.addresses.isEmpty) {
+      // 주소가 없으면 주소 관리 화면으로 이동
+      Navigator.of(context).pushNamed('/addresses').then((_) {
+        _loadAddresses();
+      });
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '배송지 선택',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).pushNamed('/addresses').then((_) {
+                      _loadAddresses();
+                    });
+                  },
+                  icon: const Icon(Icons.add, size: 20),
+                  label: const Text('새 주소 추가'),
+                ),
+              ],
+            ),
+            const Divider(),
+            ...addressProvider.addresses.map((address) => ListTile(
+              leading: Icon(
+                address.isDefault ? Icons.home : Icons.location_on,
+                color: address.isDefault ? Theme.of(context).primaryColor : Colors.grey,
+              ),
+                              title: Row(
+                                children: [
+                                  Expanded(child: Text(address.recipientName)),
+                  if (address.isDefault)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '기본',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+                              subtitle: Text('${address.address} ${address.addressDetail ?? ""}'),
+              selected: _selectedAddress?.id == address.id,
+              onTap: () {
+                setState(() {
+                  _selectedAddress = address;
+                  _fillAddressForm(address);
+                });
+                Navigator.pop(context);
+              },
+            )),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -76,6 +195,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         throw Exception('로그인이 필요합니다');
       }
 
+      // 주소 정보 가져오기 (선택된 주소 또는 입력한 주소)
+      Map<String, dynamic> shippingAddress;
+      if (_selectedAddress != null) {
+        shippingAddress = {
+          'name': _selectedAddress!.recipientName,
+          'phone': _selectedAddress!.phone,
+          'address': _selectedAddress!.address,
+          'detailAddress': _selectedAddress!.addressDetail ?? '',
+          'zipcode': _selectedAddress!.zipCode,
+        };
+      } else {
+        shippingAddress = {
+          'name': _nameController.text,
+          'phone': _phoneController.text,
+          'address': _addressController.text,
+          'detailAddress': _detailAddressController.text,
+          'zipcode': _zipcodeController.text,
+        };
+      }
+
       // 1. Create order
       final orderItems = cartProvider.items.map((item) => {
         'productId': item.product.id,
@@ -88,13 +227,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final orderResponse = await _apiService.createOrder(
         userId: authProvider.userId!,
         items: orderItems,
-        shippingAddress: {
-          'name': _nameController.text,
-          'phone': _phoneController.text,
-          'address': _addressController.text,
-          'detailAddress': _detailAddressController.text,
-          'zipcode': _zipcodeController.text,
-        },
+        shippingAddress: shippingAddress,
       );
 
       if (orderResponse['success'] != true) {
@@ -257,96 +390,171 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               const SizedBox(height: 24),
 
               // Delivery information
-              const Text(
-                '배송 정보',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '받는 사람',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '받는 사람을 입력해주세요';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: '연락처',
-                  border: OutlineInputBorder(),
-                  hintText: '010-1234-5678',
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '연락처를 입력해주세요';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _zipcodeController,
-                      decoration: const InputDecoration(
-                        labelText: '우편번호',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '우편번호를 입력해주세요';
-                        }
-                        return null;
-                      },
+                  const Text(
+                    '배송 정보',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _searchAddress,
-                    child: const Text('주소 검색'),
+                  Consumer<AddressProvider>(
+                    builder: (context, addressProvider, child) {
+                      return TextButton.icon(
+                        onPressed: _selectAddress,
+                        icon: const Icon(Icons.location_on, size: 20),
+                        label: Text(
+                          _selectedAddress != null ? '배송지 변경' : '배송지 선택',
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: '주소',
-                  border: OutlineInputBorder(),
+              // 선택된 주소 표시
+              if (_selectedAddress != null)
+                Consumer<AddressProvider>(
+                  builder: (context, addressProvider, child) {
+                    return Card(
+                      color: Colors.blue[50],
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  _selectedAddress!.isDefault ? Icons.home : Icons.location_on,
+                                  size: 20,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _selectedAddress!.recipientName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                if (_selectedAddress!.isDefault) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      '기본',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(_selectedAddress!.phone),
+                            const SizedBox(height: 4),
+                            Text('${_selectedAddress!.address} ${_selectedAddress!.addressDetail ?? ""}'),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '주소를 입력해주세요';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _detailAddressController,
-                decoration: const InputDecoration(
-                  labelText: '상세 주소',
-                  border: OutlineInputBorder(),
+              if (_selectedAddress == null)
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: '받는 사람',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '받는 사람을 입력해주세요';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '상세 주소를 입력해주세요';
-                  }
-                  return null;
-                },
-              ),
+              if (_selectedAddress == null) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(
+                    labelText: '연락처',
+                    border: OutlineInputBorder(),
+                    hintText: '010-1234-5678',
+                  ),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '연락처를 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _zipcodeController,
+                        decoration: const InputDecoration(
+                          labelText: '우편번호',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '우편번호를 입력해주세요';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _searchAddress,
+                      child: const Text('주소 검색'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(
+                    labelText: '주소',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '주소를 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _detailAddressController,
+                  decoration: const InputDecoration(
+                    labelText: '상세 주소',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '상세 주소를 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+              ],
               const SizedBox(height: 24),
 
               // Payment summary

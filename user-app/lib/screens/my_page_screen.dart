@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import '../providers/order_provider.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({Key? key}) : super(key: key);
@@ -8,6 +11,23 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
+    });
+  }
+
+  Future<void> _loadUserData() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+    if (authProvider.isAuthenticated && authProvider.userId != null) {
+      await orderProvider.fetchOrders(authProvider.userId!, refresh: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,51 +72,63 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   Widget _buildProfileSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      color: Colors.white,
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 35,
-            backgroundColor: Colors.blue,
-            child: const Icon(
-              Icons.person,
-              size: 40,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '홍길동',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final userName = authProvider.userName ?? '사용자';
+        final userEmail = authProvider.userEmail ?? '';
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          color: Colors.white,
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 35,
+                backgroundColor: Colors.blue,
+                child: const Icon(
+                  Icons.person,
+                  size: 40,
+                  color: Colors.white,
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  'user@example.com',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      userEmail,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  // 프로필 편집 (추후 구현)
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('프로필 편집 기능은 준비 중입니다'),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // 프로필 편집
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -176,58 +208,83 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   Widget _buildOrderSection() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '주문 관리',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Consumer<OrderProvider>(
+      builder: (context, orderProvider, child) {
+        final pendingCount = orderProvider.getOrderCountByStatus('pending');
+        final shippedCount = orderProvider.getOrderCountByStatus('shipped');
+        final deliveredCount = orderProvider.getOrderCountByStatus('delivered');
+        final cancelledCount = orderProvider.getOrderCountByStatus('cancelled');
+
+        return Container(
+          color: Colors.white,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildOrderStatusItem(
-                icon: Icons.payment,
-                label: '결제대기',
-                count: 0,
+              const Text(
+                '주문 관리',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              _buildOrderStatusItem(
-                icon: Icons.local_shipping,
-                label: '배송중',
-                count: 2,
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildOrderStatusItem(
+                    icon: Icons.payment,
+                    label: '결제대기',
+                    count: pendingCount,
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/orders');
+                    },
+                  ),
+                  _buildOrderStatusItem(
+                    icon: Icons.local_shipping,
+                    label: '배송중',
+                    count: shippedCount,
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/orders');
+                    },
+                  ),
+                  _buildOrderStatusItem(
+                    icon: Icons.check_circle,
+                    label: '배송완료',
+                    count: deliveredCount,
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/orders');
+                    },
+                  ),
+                  _buildOrderStatusItem(
+                    icon: Icons.cancel,
+                    label: '취소됨',
+                    count: cancelledCount,
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/orders');
+                    },
+                  ),
+                ],
               ),
-              _buildOrderStatusItem(
-                icon: Icons.check_circle,
-                label: '배송완료',
-                count: 15,
+              const SizedBox(height: 15),
+              _buildMenuItem(
+                icon: Icons.list_alt,
+                title: '전체 주문내역',
+                onTap: () {
+                  Navigator.of(context).pushNamed('/orders');
+                },
               ),
-              _buildOrderStatusItem(
-                icon: Icons.rate_review,
-                label: '리뷰작성',
-                count: 3,
+              _buildMenuItem(
+                icon: Icons.cancel,
+                title: '취소/반품/교환',
+                onTap: () {
+                  Navigator.of(context).pushNamed('/orders');
+                },
               ),
             ],
           ),
-          const SizedBox(height: 15),
-          _buildMenuItem(
-            icon: Icons.list_alt,
-            title: '전체 주문내역',
-            onTap: () {},
-          ),
-          _buildMenuItem(
-            icon: Icons.cancel,
-            title: '취소/반품/교환',
-            onTap: () {},
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -235,9 +292,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
     required IconData icon,
     required String label,
     required int count,
+    required VoidCallback onTap,
   }) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Column(
         children: [
           Stack(
@@ -375,7 +433,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.location_on,
             title: '배송지 관리',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/addresses');
+            },
           ),
           _buildMenuItem(
             icon: Icons.person,
@@ -451,8 +511,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ),
           TextButton(
             onPressed: () {
-              // 로그아웃 처리
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              authProvider.logout();
               Navigator.pop(context);
+              Navigator.of(context).pushReplacementNamed('/login');
             },
             child: const Text(
               '로그아웃',

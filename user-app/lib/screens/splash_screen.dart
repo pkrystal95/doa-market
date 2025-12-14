@@ -53,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'DOA Market',
                 style: TextStyle(
                   fontSize: 32,
+                  fontFamily: 'SchoolSafetyRoundedSmile',
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),

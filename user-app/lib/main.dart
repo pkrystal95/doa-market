@@ -6,6 +6,7 @@ import 'providers/product_provider.dart';
 import 'providers/wishlist_provider.dart';
 import 'providers/category_provider.dart';
 import 'providers/address_provider.dart';
+import 'providers/order_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -15,6 +16,8 @@ import 'screens/cart_screen.dart';
 import 'screens/my_page_screen.dart';
 import 'screens/wishlist_screen.dart';
 import 'screens/checkout_screen.dart';
+import 'screens/address_management_screen.dart';
+import 'screens/order_history_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +36,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => AddressProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: MaterialApp(
         title: 'DOA Market',
@@ -47,6 +51,32 @@ class MyApp extends StatelessWidget {
             centerTitle: true,
             elevation: 0,
           ),
+          textTheme: const TextTheme(
+            displayLarge: TextStyle(
+              fontFamily: 'SchoolSafetyRoundedSmile',
+              fontWeight: FontWeight.normal,
+            ),
+            displayMedium: TextStyle(
+              fontFamily: 'SchoolSafetyRoundedSmile',
+              fontWeight: FontWeight.normal,
+            ),
+            displaySmall: TextStyle(
+              fontFamily: 'SchoolSafetyRoundedSmile',
+              fontWeight: FontWeight.normal,
+            ),
+            headlineLarge: TextStyle(
+              fontFamily: 'SchoolSafetyRoundedSmile',
+              fontWeight: FontWeight.bold,
+            ),
+            headlineMedium: TextStyle(
+              fontFamily: 'SchoolSafetyRoundedSmile',
+              fontWeight: FontWeight.bold,
+            ),
+            headlineSmall: TextStyle(
+              fontFamily: 'SchoolSafetyRoundedSmile',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         initialRoute: '/',
         routes: {
@@ -59,6 +89,8 @@ class MyApp extends StatelessWidget {
           '/mypage': (context) => const MyPageScreen(),
           '/wishlist': (context) => const WishlistScreen(),
           '/checkout': (context) => const CheckoutScreen(),
+          '/addresses': (context) => const AddressManagementScreen(),
+          '/orders': (context) => const OrderHistoryScreen(),
         },
       ),
     );

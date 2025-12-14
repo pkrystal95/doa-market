@@ -34,7 +34,7 @@ class ApiService {
   Future<Map<String, dynamic>> getProducts({int page = 1, int limit = 20}) async {
     try {
       final response = await http.get(
-        Uri.parse('$productServiceUrl/products?page=$page&limit=$limit'),
+        Uri.parse('$productServiceUrl?page=$page&limit=$limit'),
         headers: _getHeaders(),
       );
 
@@ -52,7 +52,7 @@ class ApiService {
   Future<Map<String, dynamic>> getProduct(String productId) async {
     try {
       final response = await http.get(
-        Uri.parse('$productServiceUrl/products/$productId'),
+        Uri.parse('$productServiceUrl/$productId'),
         headers: _getHeaders(),
       );
 
@@ -208,6 +208,24 @@ class ApiService {
         return json.decode(response.body);
       } else {
         throw Exception('주문 목록을 불러오는데 실패했습니다');
+      }
+    } catch (e) {
+      throw Exception('네트워크 오류: $e');
+    }
+  }
+
+  // 주문 상세 조회
+  Future<Map<String, dynamic>> getOrder(String userId, String orderId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$orderServiceUrl/orders/$orderId'),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('주문 상세를 불러오는데 실패했습니다');
       }
     } catch (e) {
       throw Exception('네트워크 오류: $e');
@@ -407,7 +425,7 @@ class ApiService {
   }) async {
     try {
       final response = await http.get(
-        Uri.parse('$productServiceUrl/products?categoryId=$categoryId&page=$page&limit=$limit'),
+        Uri.parse('$productServiceUrl?categoryId=$categoryId&page=$page&limit=$limit'),
         headers: _getHeaders(),
       );
 

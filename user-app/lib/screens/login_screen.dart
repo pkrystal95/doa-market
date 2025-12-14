@@ -81,7 +81,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 64,
-                    fontWeight: FontWeight.w900,
+                    fontFamily: 'SchoolSafetyRoundedSmile',
+                    fontWeight: FontWeight.bold,
                     color: primaryBlue,
                     letterSpacing: 2,
                   ),

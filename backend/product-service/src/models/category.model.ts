@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/database';
+import { DataTypes, Model, Optional } from "sequelize";
+import { sequelize } from "../config/database";
 
 interface CategoryAttributes {
   categoryId: string;
@@ -12,9 +12,21 @@ interface CategoryAttributes {
   updatedAt?: Date;
 }
 
-interface CategoryCreationAttributes extends Optional<CategoryAttributes, 'categoryId' | 'parentId' | 'displayOrder' | 'isActive' | 'createdAt' | 'updatedAt'> {}
+interface CategoryCreationAttributes
+  extends Optional<
+    CategoryAttributes,
+    | "categoryId"
+    | "parentId"
+    | "displayOrder"
+    | "isActive"
+    | "createdAt"
+    | "updatedAt"
+  > {}
 
-class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
+class Category
+  extends Model<CategoryAttributes, CategoryCreationAttributes>
+  implements CategoryAttributes
+{
   declare categoryId: string;
   declare name: string;
   declare slug: string;
@@ -45,8 +57,8 @@ Category.init(
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: 'categories',
-        key: 'categoryId',
+        model: "categories",
+        key: "categoryId",
       },
     },
     displayOrder: {
@@ -60,20 +72,20 @@ Category.init(
   },
   {
     sequelize,
-    tableName: 'categories',
+    tableName: "categories",
     timestamps: true,
   }
 );
 
 // Self-referencing relationship
 Category.hasMany(Category, {
-  as: 'subcategories',
-  foreignKey: 'parentId',
+  as: "subcategories",
+  foreignKey: "parentId",
 });
 
 Category.belongsTo(Category, {
-  as: 'parent',
-  foreignKey: 'parentId',
+  as: "parent",
+  foreignKey: "parentId",
 });
 
 export default Category;

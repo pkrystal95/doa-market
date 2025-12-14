@@ -134,6 +134,16 @@ class CartScreen extends StatelessWidget {
                                       color: Colors.grey[600],
                                     ),
                                   ),
+                                  if (item.product.stock > 0) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '재고: ${item.product.stock}개',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                  ],
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
@@ -147,11 +157,40 @@ class CartScreen extends StatelessWidget {
                                               item.product.id,
                                               item.quantity - 1,
                                             );
+                                          } else {
+                                            // 수량이 1일 때 삭제 확인
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text('상품 삭제'),
+                                                content: const Text('이 상품을 장바구니에서 삭제하시겠습니까?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context),
+                                                    child: const Text('취소'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      cart.removeItem(item.product.id);
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                      '삭제',
+                                                      style: TextStyle(color: Colors.red),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
                                           }
                                         },
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.grey[300]!),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
                                         child: Text(
                                           '${item.quantity}',
                                           style: const TextStyle(
@@ -218,7 +257,7 @@ class CartScreen extends StatelessWidget {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, -2),
                     ),

@@ -8,11 +8,13 @@ class AuthProvider with ChangeNotifier {
   String? _userId;
   String? _token;
   String? _userEmail;
+  String? _userName;
 
   bool get isAuthenticated => _isAuthenticated;
   String? get userId => _userId;
   String? get token => _token;
   String? get userEmail => _userEmail;
+  String? get userName => _userName;
 
   static const String apiGatewayUrl = 'http://localhost:3000/api/v1';
 
@@ -25,6 +27,7 @@ class AuthProvider with ChangeNotifier {
     _token = prefs.getString('token');
     _userId = prefs.getString('userId');
     _userEmail = prefs.getString('userEmail');
+    _userName = prefs.getString('userName');
     _isAuthenticated = _token != null;
     notifyListeners();
   }
@@ -52,10 +55,12 @@ class AuthProvider with ChangeNotifier {
           await prefs.setString('token', accessToken);
           await prefs.setString('userId', user['userId']);
           await prefs.setString('userEmail', user['email']);
+          await prefs.setString('userName', user['name'] ?? user['email']);
 
           _token = accessToken;
           _userId = user['userId'];
           _userEmail = user['email'];
+          _userName = user['name'] ?? user['email'];
           _isAuthenticated = true;
           notifyListeners();
         } else {
@@ -99,10 +104,12 @@ class AuthProvider with ChangeNotifier {
     await prefs.remove('token');
     await prefs.remove('userId');
     await prefs.remove('userEmail');
+    await prefs.remove('userName');
 
     _token = null;
     _userId = null;
     _userEmail = null;
+    _userName = null;
     _isAuthenticated = false;
     notifyListeners();
   }
