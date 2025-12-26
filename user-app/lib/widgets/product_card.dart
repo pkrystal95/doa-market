@@ -59,7 +59,9 @@ class ProductCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildProductInfo(isDark),
+                    Expanded(
+                      child: _buildProductInfo(isDark),
+                    ),
                     if (showActions && !isOutOfStock && onAddToCart != null)
                       _buildAddToCartButton(isDark),
                   ],
@@ -162,6 +164,7 @@ class ProductCard extends StatelessWidget {
   Widget _buildProductInfo(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           product.name ?? '',
@@ -169,10 +172,10 @@ class ProductCard extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
-          maxLines: 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: AppSpacing.xxs),
+        const SizedBox(height: 2),
         PriceText(
           price: product.price ?? 0,
           size: PriceTextSize.small,

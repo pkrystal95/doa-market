@@ -42,10 +42,12 @@ router.get('/', async (req, res) => {
     const offset = (page - 1) * limit;
     const category = req.query.category as string;
     const status = req.query.status as string;
+    const priority = req.query.priority as string;
 
     const where: any = {};
     if (category) where.category = category;
     if (status) where.status = status;
+    if (priority) where.priority = priority;
 
     const { count, rows } = await Notice.findAndCountAll({
       where,
@@ -53,6 +55,7 @@ router.get('/', async (req, res) => {
       offset,
       order: [
         ['isPinned', 'DESC'],
+        ['priority', 'DESC'], // urgent first
         ['createdAt', 'DESC']
       ],
     });

@@ -7,8 +7,12 @@ class Notice extends Model {
   public content!: string;
   public category!: string;
   public status!: string;
+  public priority!: string;
   public views!: number;
   public isPinned!: boolean;
+  public attachments?: string[];
+  public startDate?: Date;
+  public endDate?: Date;
   public createdBy!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -41,6 +45,11 @@ Notice.init(
       defaultValue: 'draft',
       comment: '공지사항 상태'
     },
+    priority: {
+      type: DataTypes.ENUM('normal', 'urgent'),
+      defaultValue: 'normal',
+      comment: '우선순위: 일반/긴급'
+    },
     views: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
@@ -50,6 +59,21 @@ Notice.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       comment: '상단 고정 여부'
+    },
+    attachments: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: '첨부파일 URL 배열'
+    },
+    startDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: '게시 시작일'
+    },
+    endDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: '게시 종료일'
     },
     createdBy: {
       type: DataTypes.UUID,

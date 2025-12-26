@@ -140,5 +140,129 @@ router.patch('/:id/status', async (req, res) => {
   }
 });
 
+/**
+ * 주문 취소
+ * POST /api/v1/orders/:orderId/cancel
+ */
+router.post('/:orderId/cancel', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { userId, reason } = req.body;
+
+    const order = await Order.findByPk(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    // Check if order can be cancelled
+    if (!['pending', 'confirmed'].includes(order.status)) {
+      return res.status(400).json({
+        success: false,
+        error: '취소할 수 없는 주문 상태입니다',
+      });
+    }
+
+    // Update order status
+    order.status = 'cancelled';
+    await order.save();
+
+    logger.info(`Order ${orderId} cancelled. Reason: ${reason}`);
+
+    // Publish cancellation event
+    await eventBus.publish(EventType.ORDER_CANCELLED, {
+      orderId: order.id,
+      userId: userId || order.userId,
+      reason: reason || '사용자 요청',
+    });
+
+    res.json({
+      success: true,
+      data: order,
+      message: '주문이 취소되었습니다',
+    });
+  } catch (error: any) {
+    logger.error('Error cancelling order:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 반품 신청
+ * POST /api/v1/orders/:orderId/return
+ */
+router.post('/:orderId/return', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { userId, reason, imageUrls } = req.body;
+
+    const order = await Order.findByPk(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    // Check if order can be returned
+    if (!['delivered', 'confirmed'].includes(order.status)) {
+      return res.status(400).json({
+        success: false,
+        error: '반품 신청할 수 없는 주문 상태입니다',
+      });
+    }
+
+    // Update order status to return requested
+    order.status = 'return_requested';
+    await order.save();
+
+    logger.info(`Return requested for order ${orderId}. Reason: ${reason}`);
+
+    res.json({
+      success: true,
+      data: order,
+      message: '반품 신청이 완료되었습니다',
+    });
+  } catch (error: any) {
+    logger.error('Error requesting return:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 교환 신청
+ * POST /api/v1/orders/:orderId/exchange
+ */
+router.post('/:orderId/exchange', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { userId, reason, imageUrls } = req.body;
+
+    const order = await Order.findByPk(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    // Check if order can be exchanged
+    if (!['delivered', 'confirmed'].includes(order.status)) {
+      return res.status(400).json({
+        success: false,
+        error: '교환 신청할 수 없는 주문 상태입니다',
+      });
+    }
+
+    // Update order status to exchange requested
+    order.status = 'exchange_requested';
+    await order.save();
+
+    logger.info(`Exchange requested for order ${orderId}. Reason: ${reason}`);
+
+    res.json({
+      success: true,
+      data: order,
+      message: '교환 신청이 완료되었습니다',
+    });
+  } catch (error: any) {
+    logger.error('Error requesting exchange:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default router;
 

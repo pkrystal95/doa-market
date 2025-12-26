@@ -1,0 +1,26 @@
+00:00 +0: loading /Users/krystal/workspace/doa-market/user-app/test/providers/auth_provider_test.dart
+00:00 +0: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +1: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +2: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +3: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +4: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +5: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +6: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +7: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +8: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +9: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +10: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +11: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +12: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +13: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 화면에 필수 요소들이 표시되어야 함
+00:00 +14: /Users/krystal/workspace/doa-market/user-app/test/providers/auth_provider_test.dart: AuthProvider Tests 저장된 인증 정보가 있으면 로드되어야 함
+00:00 +15: /Users/krystal/workspace/doa-market/user-app/test/providers/auth_provider_test.dart: AuthProvider Tests 저장된 인증 정보가 있으면 로드되어야 함
+00:00 +16: /Users/krystal/workspace/doa-market/user-app/test/providers/auth_provider_test.dart: AuthProvider Tests 저장된 인증 정보가 있으면 로드되어야 함
+00:00 +17: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 비밀번호 입력이 가능해야 함
+00:00 +18: /Users/krystal/workspace/doa-market/user-app/test/providers/auth_provider_test.dart: AuthProvider Tests API Gateway URL이 올바르게 설정되어야 함
+00:00 +19: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 비밀번호 표시/숨김 토글이 동작해야 함
+00:00 +20: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 자동 로그인 체크박스가 동작해야 함
+00:00 +21: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 빈 입력으로 로그인 시도 시 에러 메시지가 표시되어야 함
+00:00 +22: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 회원가입 버튼 클릭 시 페이지 이동
+00:00 +23: /Users/krystal/workspace/doa-market/user-app/test/widgets/login_screen_test.dart: LoginScreen Widget Tests 로그인 버튼이 비활성화되지 않아야 함 (초기 상태)
+00:00 +24: All tests passed!

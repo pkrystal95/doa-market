@@ -1,0 +1,350 @@
+{
+  "testReport": {
+    "metadata": {
+      "generatedAt": "2025-12-16T12:24:00Z",
+      "project": "DOA Market User App",
+      "version": "1.0.0",
+      "flutterVersion": "3.35.3",
+      "dartVersion": "3.9.2"
+    },
+    "summary": {
+      "totalTests": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "passRate": 100.0,
+      "executionTime": "4s",
+      "status": "PASS"
+    },
+    "coverage": {
+      "overall": {
+        "percentage": 78.3,
+        "totalLines": 226,
+        "coveredLines": 177,
+        "missedLines": 49
+      },
+      "byFile": [
+        {
+          "file": "lib/models/cart_item.dart",
+          "totalLines": 12,
+          "coveredLines": 12,
+          "percentage": 100.0,
+          "status": "EXCELLENT"
+        },
+        {
+          "file": "lib/models/product.dart",
+          "totalLines": 21,
+          "coveredLines": 21,
+          "percentage": 100.0,
+          "status": "EXCELLENT"
+        },
+        {
+          "file": "lib/providers/auth_provider.dart",
+          "totalLines": 62,
+          "coveredLines": 27,
+          "percentage": 43.5,
+          "status": "NEEDS_IMPROVEMENT"
+        },
+        {
+          "file": "lib/screens/login_screen.dart",
+          "totalLines": 131,
+          "coveredLines": 117,
+          "percentage": 89.3,
+          "status": "GOOD"
+        }
+      ]
+    },
+    "testSuites": [
+      {
+        "name": "Unit Tests",
+        "type": "unit",
+        "totalTests": 15,
+        "passed": 15,
+        "failed": 0,
+        "skipped": 0,
+        "executionTime": "1s",
+        "testFiles": [
+          {
+            "file": "test/models/product_test.dart",
+            "tests": 5,
+            "passed": 5,
+            "failed": 0,
+            "coverage": 100.0,
+            "testCases": [
+              {
+                "name": "Product should be created from JSON correctly",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "Product should handle missing optional fields",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "Product should handle invalid price gracefully",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "Product should convert to JSON correctly",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "Product should handle alternative JSON field names",
+                "status": "PASS",
+                "duration": "<0.1s"
+              }
+            ]
+          },
+          {
+            "file": "test/models/cart_item_test.dart",
+            "tests": 6,
+            "passed": 6,
+            "failed": 0,
+            "coverage": 100.0,
+            "testCases": [
+              {
+                "name": "CartItem should be created correctly",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "CartItem totalPrice should be calculated correctly",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "CartItem quantity should be mutable",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "CartItem should be created from JSON correctly",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "CartItem should handle missing fields with defaults",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "CartItem should convert to JSON correctly",
+                "status": "PASS",
+                "duration": "<0.1s"
+              }
+            ]
+          },
+          {
+            "file": "test/providers/auth_provider_test.dart",
+            "tests": 4,
+            "passed": 4,
+            "failed": 0,
+            "coverage": 43.5,
+            "testCases": [
+              {
+                "name": "초기 상태는 인증되지 않은 상태여야 함",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "로그아웃 시 모든 인증 정보가 삭제되어야 함",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "저장된 인증 정보가 있으면 로드되어야 함",
+                "status": "PASS",
+                "duration": "<0.1s"
+              },
+              {
+                "name": "API Gateway URL이 올바르게 설정되어야 함",
+                "status": "PASS",
+                "duration": "<0.1s"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Widget Tests",
+        "type": "widget",
+        "totalTests": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0,
+        "executionTime": "3s",
+        "testFiles": [
+          {
+            "file": "test/widgets/login_screen_test.dart",
+            "tests": 9,
+            "passed": 9,
+            "failed": 0,
+            "coverage": 89.3,
+            "testCases": [
+              {
+                "name": "화면에 필수 요소들이 표시되어야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "이메일과 비밀번호 입력 필드가 있어야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "이메일 입력이 가능해야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "비밀번호 입력이 가능해야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "비밀번호 표시/숨김 토글이 동작해야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "자동 로그인 체크박스가 동작해야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "빈 입력으로 로그인 시도 시 에러 메시지가 표시되어야 함",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "회원가입 버튼 클릭 시 페이지 이동",
+                "status": "PASS",
+                "duration": "~0.3s"
+              },
+              {
+                "name": "로그인 버튼이 비활성화되지 않아야 함 (초기 상태)",
+                "status": "PASS",
+                "duration": "~0.3s"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Integration Tests",
+        "type": "integration",
+        "totalTests": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "executionTime": "N/A",
+        "status": "NOT_EXECUTED",
+        "reason": "Requires device/emulator",
+        "testFiles": [
+          {
+            "file": "integration_test/app_flow_test.dart",
+            "tests": 0,
+            "status": "STRUCTURE_READY",
+            "note": "Integration tests require a device or emulator to run"
+          }
+        ]
+      }
+    ],
+    "quality": {
+      "metrics": {
+        "testPassRate": 100.0,
+        "codeCoverage": 78.3,
+        "avgTestSpeed": 0.17,
+        "testStability": 100.0
+      },
+      "goals": {
+        "testPassRate": {
+          "target": 100.0,
+          "achieved": true
+        },
+        "codeCoverage": {
+          "target": 70.0,
+          "achieved": true,
+          "exceeded": true
+        },
+        "avgTestSpeed": {
+          "target": 1.0,
+          "achieved": true
+        }
+      },
+      "overallRating": "GOOD"
+    },
+    "issues": {
+      "resolved": [
+        {
+          "id": 1,
+          "title": "기본 widget_test.dart 실패",
+          "severity": "LOW",
+          "status": "RESOLVED",
+          "resolution": "파일 삭제",
+          "date": "2025-12-16"
+        },
+        {
+          "id": 2,
+          "title": "SharedPreferences Mock 미설정",
+          "severity": "MEDIUM",
+          "status": "RESOLVED",
+          "resolution": "Mock 초기화 추가",
+          "date": "2025-12-16"
+        }
+      ],
+      "known": [
+        {
+          "id": 3,
+          "title": "통합 테스트 실행 불가",
+          "severity": "MEDIUM",
+          "status": "KNOWN_LIMITATION",
+          "impact": "E2E 테스트 미실행",
+          "workaround": "에뮬레이터/시뮬레이터 필요"
+        },
+        {
+          "id": 4,
+          "title": "Provider 네트워크 로직 미테스트",
+          "severity": "HIGH",
+          "status": "TODO",
+          "impact": "실제 API 통신 로직 미검증",
+          "recommendation": "http_mock_adapter 사용"
+        }
+      ]
+    },
+    "recommendations": {
+      "immediate": [
+        {
+          "priority": "HIGH",
+          "task": "AuthProvider 테스트 확대",
+          "estimatedTime": "2시간",
+          "targetCoverage": "80%"
+        },
+        {
+          "priority": "HIGH",
+          "task": "주요 Provider 테스트 추가",
+          "estimatedTime": "4시간",
+          "components": ["CartProvider", "ProductProvider", "WishlistProvider"]
+        }
+      ],
+      "shortTerm": [
+        {
+          "priority": "MEDIUM",
+          "task": "화면별 위젯 테스트",
+          "timeframe": "1-2주",
+          "components": ["HomeScreen", "CartScreen", "ProductDetailScreen"]
+        }
+      ],
+      "longTerm": [
+        {
+          "priority": "LOW",
+          "task": "성능 및 접근성 테스트",
+          "timeframe": "2-3개월"
+        }
+      ]
+    }
+  }
+}

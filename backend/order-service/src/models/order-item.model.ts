@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/database';
+import { sequelize } from '../config/database';
 
 interface OrderItemAttributes {
   orderItemId: string;
@@ -41,7 +41,7 @@ OrderItem.init(
       allowNull: false,
       references: {
         model: 'orders',
-        key: 'orderId',
+        key: 'id',
       },
       onDelete: 'CASCADE',
     },

@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3013;
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://rabbitmq:rabbitmq123@localhost:5672/doa-market';
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://rabbitmq:rabbitmq123@rabbitmq:5672/doa-market';
 
 app.use(helmet());
 app.use(cors());

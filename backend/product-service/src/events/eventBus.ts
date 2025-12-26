@@ -1,4 +1,4 @@
-import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
+import * as amqp from 'amqplib';
 import { EventType, DomainEvent, BaseEvent } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,8 +11,8 @@ export interface EventBusConfig {
 export type EventHandler<T extends DomainEvent = DomainEvent> = (event: T) => Promise<void>;
 
 export class EventBus {
-  private connection: Connection | null = null;
-  private channel: Channel | null = null;
+  private connection: amqp.Connection | null = null;
+  private channel: amqp.Channel | null = null;
   private config: EventBusConfig;
   private handlers: Map<EventType, EventHandler[]> = new Map();
   private isConnected = false;
@@ -24,8 +24,8 @@ export class EventBus {
   async connect(): Promise<void> {
     try {
       console.log(`[EventBus] Connecting to RabbitMQ at ${this.config.url}...`);
-      this.connection = await amqp.connect(this.config.url);
-      this.channel = await this.connection.createChannel();
+      this.connection = await amqp.connect(this.config.url) as any;
+      this.channel = await (this.connection as any).createChannel();
 
       // Assert exchange (topic type for flexible routing)
       await this.channel.assertExchange(this.config.exchange, 'topic', {
@@ -112,7 +112,7 @@ export class EventBus {
     // Consume messages
     await this.channel.consume(
       queue.queue,
-      async (msg: ConsumeMessage | null) => {
+      async (msg: amqp.ConsumeMessage | null) => {
         if (!msg) return;
 
         try {
@@ -142,10 +142,10 @@ export class EventBus {
   async disconnect(): Promise<void> {
     try {
       if (this.channel) {
-        await this.channel.close();
+        await (this.channel as any).close();
       }
       if (this.connection) {
-        await this.connection.close();
+        await (this.connection as any).close();
       }
       this.isConnected = false;
       console.log('[EventBus] Disconnected from RabbitMQ');
@@ -166,7 +166,7 @@ export class EventBus {
 // Factory function to create EventBus instance
 export function createEventBus(serviceName: string): EventBus {
   const config: EventBusConfig = {
-    url: process.env.RABBITMQ_URL || 'amqp://rabbitmq:rabbitmq123@localhost:5672/doa-market',
+    url: process.env.RABBITMQ_URL || 'amqp://rabbitmq:rabbitmq123@rabbitmq:5672/doa-market',
     exchange: 'doa-market-events',
     serviceName,
   };

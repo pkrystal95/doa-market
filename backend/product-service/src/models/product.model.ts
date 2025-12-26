@@ -13,6 +13,8 @@ class Product extends Model {
   public status!: string;
   public stockQuantity!: number;
   public thumbnail?: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 Product.init(
@@ -29,7 +31,7 @@ Product.init(
     stockQuantity: { type: DataTypes.INTEGER, defaultValue: 0 },
     thumbnail: { type: DataTypes.TEXT },
   },
-  { sequelize, tableName: 'products' }
+  { sequelize, tableName: 'products', timestamps: true }
 );
 
 export default Product;

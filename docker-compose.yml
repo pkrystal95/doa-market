@@ -187,6 +187,8 @@ services:
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
       JWT_ACCESS_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 1000
       AWS_REGION: ap-northeast-2
       AWS_ENDPOINT: http://localstack:4566
     ports:
@@ -207,6 +209,8 @@ services:
       PORT: 3002
       DB_HOST: postgres
       DB_NAME: doa_users
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
     ports:
       - "3002:3002"
     depends_on:
@@ -398,6 +402,10 @@ services:
     container_name: doa-admin-service
     environment:
       PORT: 3014
+      DB_HOST: postgres
+      DB_NAME: doa_admin
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
     ports:
       - "3014:3014"
     networks:
@@ -536,6 +544,27 @@ services:
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  # ============================================
+  # NGINX Reverse Proxy (HTTPS)
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: doa-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - auth-service
+      - user-service
+      - product-service
+      - order-service
     networks:
       - doa-network
     restart: unless-stopped

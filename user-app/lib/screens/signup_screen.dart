@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'policy_viewer_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,6 +18,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  bool _agreeToTerms = false;
+  bool _agreeToPrivacy = false;
 
   @override
   void dispose() {
@@ -28,6 +32,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (!_agreeToTerms || !_agreeToPrivacy) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('이용약관 및 개인정보 처리방침에 동의해주세요'),
+          backgroundColor: Colors.orange,
+        ),
+      );
       return;
     }
 
@@ -176,6 +190,33 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
+
+                // 이용약관 동의
+                _buildPolicyCheckbox(
+                  value: _agreeToTerms,
+                  onChanged: (value) {
+                    setState(() {
+                      _agreeToTerms = value ?? false;
+                    });
+                  },
+                  policyText: '이용약관',
+                  policyType: PolicyType.terms,
+                ),
+                const SizedBox(height: 8),
+
+                // 개인정보 처리방침 동의
+                _buildPolicyCheckbox(
+                  value: _agreeToPrivacy,
+                  onChanged: (value) {
+                    setState(() {
+                      _agreeToPrivacy = value ?? false;
+                    });
+                  },
+                  policyText: '개인정보 처리방침',
+                  policyType: PolicyType.privacy,
+                ),
+                const SizedBox(height: 24),
+
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleSignup,
                   style: ElevatedButton.styleFrom(
@@ -210,6 +251,66 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPolicyCheckbox({
+    required bool value,
+    required ValueChanged<bool?> onChanged,
+    required String policyText,
+    required PolicyType policyType,
+  }) {
+    return Row(
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+        ),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodyMedium,
+              children: [
+                TextSpan(
+                  text: '$policyText에 동의합니다 ',
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ),
+                TextSpan(
+                  text: '(필수)',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PolicyViewerScreen(
+                  policyType: policyType,
+                ),
+              ),
+            );
+          },
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(0, 36),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: const Text(
+            '보기',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
+      ],
     );
   }
 }

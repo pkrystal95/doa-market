@@ -16,7 +16,7 @@ class AuthProvider with ChangeNotifier {
   String? get userEmail => _userEmail;
   String? get userName => _userName;
 
-  static const String apiGatewayUrl = 'http://localhost:3000/api/v1';
+  static const String apiGatewayUrl = 'https://192.168.0.19/api/v1';
 
   AuthProvider() {
     _loadAuth();

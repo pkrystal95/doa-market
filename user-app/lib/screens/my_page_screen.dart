@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
 import '../providers/order_provider.dart';
+import '../providers/point_provider.dart';
+import '../providers/checkin_provider.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({Key? key}) : super(key: key);
@@ -22,9 +25,15 @@ class _MyPageScreenState extends State<MyPageScreen> {
   Future<void> _loadUserData() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    final pointProvider = Provider.of<PointProvider>(context, listen: false);
+    final checkinProvider = Provider.of<CheckinProvider>(context, listen: false);
 
     if (authProvider.isAuthenticated && authProvider.userId != null) {
-      await orderProvider.fetchOrders(authProvider.userId!, refresh: true);
+      await Future.wait([
+        orderProvider.fetchOrders(authProvider.userId!, refresh: true),
+        pointProvider.fetchPointSummary(authProvider.userId!),
+        checkinProvider.fetchCheckinStatus(authProvider.userId!),
+      ]);
     }
   }
 
@@ -44,6 +53,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
           // 등급 및 포인트 섹션
           _buildTierAndPointsSection(),
+
+          const SizedBox(height: 10),
+
+          // 출석체크 섹션
+          _buildCheckinSection(),
 
           const SizedBox(height: 10),
 
@@ -146,13 +160,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ),
           const SizedBox(width: 15),
           Expanded(
-            child: _buildInfoCard(
-              icon: Icons.stars,
-              iconColor: Colors.orange,
-              title: '12,500P',
-              subtitle: '적립금',
-              onTap: () {
-                // 포인트 상세
+            child: Consumer<PointProvider>(
+              builder: (context, pointProvider, child) {
+                final numberFormat = NumberFormat('#,###');
+                final points = pointProvider.totalPoints;
+                return _buildInfoCard(
+                  icon: Icons.stars,
+                  iconColor: Colors.orange,
+                  title: '${numberFormat.format(points)}P',
+                  subtitle: '적립금',
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/point-history');
+                  },
+                );
               },
             ),
           ),
@@ -273,7 +293,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 icon: Icons.cancel,
                 title: '취소/반품/교환',
                 onTap: () {
-                  Navigator.of(context).pushNamed('/orders');
+                  Navigator.of(context).pushNamed('/order-returns');
                 },
               ),
             ],
@@ -363,12 +383,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.rate_review,
             title: '내 리뷰',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/my-reviews');
+            },
           ),
           _buildMenuItem(
             icon: Icons.question_answer,
             title: '내 상품문의',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/my-inquiries');
+            },
           ),
         ],
       ),
@@ -393,7 +417,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.headset_mic,
             title: '1:1 문의',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/inquiries');
+            },
           ),
           _buildMenuItem(
             icon: Icons.help_outline,
@@ -403,7 +429,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.announcement,
             title: '공지사항',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/notices');
+            },
           ),
         ],
       ),
@@ -490,6 +518,109 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCheckinSection() {
+    return Consumer<CheckinProvider>(
+      builder: (context, checkinProvider, child) {
+        final isCheckedIn = checkinProvider.isCheckedInToday;
+        final consecutiveDays = checkinProvider.consecutiveDays;
+
+        return InkWell(
+          onTap: () => Navigator.of(context).pushNamed('/daily-checkin'),
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isCheckedIn
+                          ? [Colors.grey[300]!, Colors.grey[400]!]
+                          : [Colors.orange[300]!, Colors.orange[500]!],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isCheckedIn ? Icons.check_circle : Icons.calendar_today,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            '출석체크',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (consecutiveDays > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red[50],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.local_fire_department,
+                                    size: 14,
+                                    color: Colors.red[700],
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    '$consecutiveDays일',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.red[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isCheckedIn
+                            ? '오늘 출석 완료! 내일도 잊지 마세요 😊'
+                            : '출석하고 10포인트 받기! 🎁',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.grey[400],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

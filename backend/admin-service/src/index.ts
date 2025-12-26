@@ -33,6 +33,9 @@ app.use('/api/v1/admin/notices', noticeRoutes);
 app.use('/api/v1/admin/inquiries', inquiryRoutes);
 app.use('/api/v1/admin/policies', policyRoutes);
 
+// Public routes (no admin prefix)
+app.use('/api/v1/notices', noticeRoutes); // Public notice access for user app
+
 const startServer = async () => {
   try {
     await sequelize.sync({ alter: true });

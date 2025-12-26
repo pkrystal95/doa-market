@@ -13,6 +13,7 @@ dependencies:
   # UI
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.9
+  flutter_markdown: ^0.6.18
 
   # State Management
   provider: ^6.1.1
@@ -27,14 +28,28 @@ dependencies:
   # Utils
   intl: ^0.19.0
   cached_network_image: ^3.3.1
+  share_plus: ^7.2.1
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
 
+  # Testing
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+  integration_test:
+    sdk: flutter
+  http_mock_adapter: ^0.6.1
+
 flutter:
   uses-material-design: true
+
+  # Assets
+  assets:
+    - assets/policies/privacy_policy.md
+    - assets/policies/terms_of_service.md
 
   # 한글 폰트 설정 (선택사항)
   # fonts:

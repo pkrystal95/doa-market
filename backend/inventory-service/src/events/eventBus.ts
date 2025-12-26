@@ -166,7 +166,7 @@ export class EventBus {
 // Factory function to create EventBus instance
 export function createEventBus(serviceName: string): EventBus {
   const config: EventBusConfig = {
-    url: process.env.RABBITMQ_URL || 'amqp://rabbitmq:rabbitmq123@localhost:5672/doa-market',
+    url: process.env.RABBITMQ_URL || 'amqp://rabbitmq:rabbitmq123@rabbitmq:5672/doa-market',
     exchange: 'doa-market-events',
     serviceName,
   };
