@@ -50,31 +50,23 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // 장바구니에 상품 추가 (서버와 동기화)
+  // 장바구니에 상품 추가 (로컬 저장소 사용)
   Future<void> addItem(Product product, {int quantity = 1}) async {
     try {
-      await _apiService.addToCart(
-        productId: product.id,
-        quantity: quantity,
-      );
-
-      // 성공하면 로컬 상태 업데이트
+      // 로컬에 추가
       final existingIndex = _items.indexWhere((item) => item.product.id == product.id);
 
       if (existingIndex >= 0) {
         _items[existingIndex].quantity += quantity;
       } else {
         _items.add(CartItem(
-          id: DateTime.now().toString(), // 임시 ID, 서버에서 실제 ID 받아야 함
+          id: product.id, // 상품 ID를 장바구니 아이템 ID로 사용
           product: product,
           quantity: quantity,
         ));
       }
 
       notifyListeners();
-
-      // 장바구니 다시 로드해서 서버 데이터와 동기화
-      await fetchCart();
     } catch (e) {
       _error = e.toString();
       print('장바구니 추가 실패: $e');
@@ -82,12 +74,9 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // 장바구니 아이템 삭제
+  // 장바구니 아이템 삭제 (로컬)
   Future<void> removeItem(String cartItemId) async {
     try {
-      await _apiService.removeCartItem(cartItemId);
-
-      // 로컬 상태 업데이트
       _items.removeWhere((item) => item.id == cartItemId);
       notifyListeners();
     } catch (e) {
@@ -97,15 +86,9 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // 수량 변경
+  // 수량 변경 (로컬)
   Future<void> updateQuantity(String cartItemId, int quantity) async {
     try {
-      await _apiService.updateCartItem(
-        cartItemId: cartItemId,
-        quantity: quantity,
-      );
-
-      // 로컬 상태 업데이트
       final index = _items.indexWhere((item) => item.id == cartItemId);
       if (index >= 0) {
         if (quantity <= 0) {
@@ -122,10 +105,9 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // 장바구니 비우기
+  // 장바구니 비우기 (로컬)
   Future<void> clear() async {
     try {
-      await _apiService.clearCart();
       _items.clear();
       notifyListeners();
     } catch (e) {

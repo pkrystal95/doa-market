@@ -4,9 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
 class ApiService {
-  // HTTPS 통합 엔드포인트 (nginx 리버스 프록시 사용)
-  static const String hostIp = '192.168.0.19';
-  static const String baseUrl = 'https://$hostIp/api/v1';
+  // 로컬 개발 환경용 API 엔드포인트 - 각 서비스에 직접 연결 (임시)
+  // 프로덕션에서는 nginx 리버스 프록시를 통해 HTTPS 사용
+  static const String hostIp = 'localhost';
+  static const String baseUrl = 'http://$hostIp:3000/api/v1'; // API Gateway 사용
 
   // HTTP Client that accepts self-signed certificates (for development/testing)
   static http.Client? _client;
@@ -20,17 +21,17 @@ class ApiService {
     return _client!;
   }
 
-  // Individual service URLs (unified through nginx reverse proxy)
-  static const String authServiceUrl = '$baseUrl/auth';
-  static const String userServiceUrl = '$baseUrl/users';
-  static const String productServiceUrl = '$baseUrl/products';
-  static const String categoryServiceUrl = '$baseUrl/categories';
-  static const String orderServiceUrl = '$baseUrl/orders';
-  static const String paymentServiceUrl = '$baseUrl/payments';
-  static const String cartServiceUrl = '$baseUrl/carts';
-  static const String wishlistServiceUrl = '$baseUrl/wishlists';
-  static const String addressServiceUrl = '$baseUrl/addresses';
-  static const String sellerServiceUrl = '$baseUrl/sellers';
+  // Individual service URLs - 직접 서비스에 연결 (API Gateway 우회)
+  static const String authServiceUrl = 'http://$hostIp:3001/api/v1';
+  static const String userServiceUrl = 'http://$hostIp:3002/api/v1';
+  static const String productServiceUrl = 'http://$hostIp:3003/api/v1';
+  static const String categoryServiceUrl = 'http://$hostIp:3003/api/v1';
+  static const String orderServiceUrl = 'http://$hostIp:3004/api/v1';
+  static const String paymentServiceUrl = 'http://$hostIp:3005/api/v1';
+  static const String cartServiceUrl = 'http://$hostIp:3000/api/v1';
+  static const String wishlistServiceUrl = 'http://$hostIp:3000/api/v1';
+  static const String addressServiceUrl = 'http://$hostIp:3002/api/v1';
+  static const String sellerServiceUrl = 'http://$hostIp:3000/api/v1';
 
   String? _token;
 
@@ -52,7 +53,7 @@ class ApiService {
   Future<Map<String, dynamic>> getProducts({int page = 1, int limit = 20}) async {
     try {
       final response = await client.get(
-        Uri.parse('$productServiceUrl?page=$page&limit=$limit'),
+        Uri.parse('$productServiceUrl/products?page=$page&limit=$limit'),
         headers: _getHeaders(),
       );
 
@@ -70,7 +71,7 @@ class ApiService {
   Future<Map<String, dynamic>> getProduct(String productId) async {
     try {
       final response = await client.get(
-        Uri.parse('$productServiceUrl/$productId'),
+        Uri.parse('$productServiceUrl/products/$productId'),
         headers: _getHeaders(),
       );
 
@@ -192,8 +193,17 @@ class ApiService {
     required String userId,
     required List<Map<String, dynamic>> items,
     required Map<String, dynamic> shippingAddress,
+    required double totalAmount,
   }) async {
     try {
+      print('API: Creating order - URL: $orderServiceUrl/orders');
+      print('API: Request body: ${json.encode({
+          'userId': userId,
+          'items': items,
+          'shippingAddress': shippingAddress,
+          'totalAmount': totalAmount,
+        })}');
+
       final response = await client.post(
         Uri.parse('$orderServiceUrl/orders'),
         headers: _getHeaders(),
@@ -201,8 +211,12 @@ class ApiService {
           'userId': userId,
           'items': items,
           'shippingAddress': shippingAddress,
+          'totalAmount': totalAmount,
         }),
       );
+
+      print('API: Order response status: ${response.statusCode}');
+      print('API: Order response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(response.body);
@@ -210,6 +224,7 @@ class ApiService {
         throw Exception('주문 생성에 실패했습니다');
       }
     } catch (e) {
+      print('API: Order creation error: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -258,6 +273,15 @@ class ApiService {
     required String productName,
   }) async {
     try {
+      print('API: Preparing payment - URL: $paymentServiceUrl/payments/prepare');
+      print('API: Payment request body: ${json.encode({
+          'orderId': orderId,
+          'userId': userId,
+          'amount': amount,
+          'productName': productName,
+          'method': 'card',
+        })}');
+
       final response = await client.post(
         Uri.parse('$paymentServiceUrl/payments/prepare'),
         headers: _getHeaders(),
@@ -266,9 +290,12 @@ class ApiService {
           'userId': userId,
           'amount': amount,
           'productName': productName,
-          'method': 'inicis',
+          'method': 'card',
         }),
       );
+
+      print('API: Payment response status: ${response.statusCode}');
+      print('API: Payment response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(response.body);
@@ -276,6 +303,7 @@ class ApiService {
         throw Exception('결제 준비에 실패했습니다');
       }
     } catch (e) {
+      print('API: Payment preparation error: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -443,7 +471,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.get(
-        Uri.parse('$productServiceUrl?categoryId=$categoryId&page=$page&limit=$limit'),
+        Uri.parse('$productServiceUrl/products?categoryId=$categoryId&page=$page&limit=$limit'),
         headers: _getHeaders(),
       );
 
@@ -672,7 +700,7 @@ class ApiService {
   /// 포인트 요약 정보 조회
   Future<Map<String, dynamic>> getPointSummary(String userId) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/points/summary');
+      final url = Uri.parse('$userServiceUrl/users/$userId/points/summary');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -688,7 +716,7 @@ class ApiService {
     int limit = 20,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/points?page=$page&limit=$limit');
+      final url = Uri.parse('$userServiceUrl/users/$userId/points?page=$page&limit=$limit');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -704,7 +732,7 @@ class ApiService {
     required String orderId,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/points/use');
+      final url = Uri.parse('$userServiceUrl/users/$userId/points/use');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -728,7 +756,7 @@ class ApiService {
     required String description,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/points/earn');
+      final url = Uri.parse('$userServiceUrl/users/$userId/points/earn');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -795,7 +823,7 @@ class ApiService {
     int limit = 20,
   }) async {
     try {
-      final url = Uri.parse('$productServiceUrl/$productId/reviews?page=$page&limit=$limit');
+      final url = Uri.parse('$productServiceUrl/products/$productId/reviews?page=$page&limit=$limit');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -811,7 +839,7 @@ class ApiService {
     int limit = 20,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/reviews?page=$page&limit=$limit');
+      final url = Uri.parse('$userServiceUrl/users/$userId/reviews?page=$page&limit=$limit');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -830,7 +858,7 @@ class ApiService {
     List<String>? imageUrls,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/reviews');
+      final url = Uri.parse('$userServiceUrl/users/$userId/reviews');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -858,7 +886,7 @@ class ApiService {
     List<String>? imageUrls,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/reviews/$reviewId');
+      final url = Uri.parse('$userServiceUrl/users/$userId/reviews/$reviewId');
       final response = await client.put(
         url,
         headers: _getHeaders(),
@@ -881,7 +909,7 @@ class ApiService {
     required String reviewId,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/reviews/$reviewId');
+      final url = Uri.parse('$userServiceUrl/users/$userId/reviews/$reviewId');
       final response = await client.delete(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -901,7 +929,7 @@ class ApiService {
     int limit = 20,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/inquiries?page=$page&limit=$limit');
+      final url = Uri.parse('$userServiceUrl/users/$userId/inquiries?page=$page&limit=$limit');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -913,7 +941,7 @@ class ApiService {
   /// 문의 상세 조회
   Future<Map<String, dynamic>> getInquiry(String userId, String inquiryId) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/inquiries/$inquiryId');
+      final url = Uri.parse('$userServiceUrl/users/$userId/inquiries/$inquiryId');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -931,7 +959,7 @@ class ApiService {
     List<String>? imageUrls,
   }) async {
     try {
-      final url = Uri.parse('$userServiceUrl/$userId/inquiries');
+      final url = Uri.parse('$userServiceUrl/users/$userId/inquiries');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -960,7 +988,7 @@ class ApiService {
     required String reason,
   }) async {
     try {
-      final url = Uri.parse('$orderServiceUrl/$orderId/cancel');
+      final url = Uri.parse('$orderServiceUrl/orders/$orderId/cancel');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -984,7 +1012,7 @@ class ApiService {
     List<String>? imageUrls,
   }) async {
     try {
-      final url = Uri.parse('$orderServiceUrl/$orderId/return');
+      final url = Uri.parse('$orderServiceUrl/orders/$orderId/return');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -1009,7 +1037,7 @@ class ApiService {
     List<String>? imageUrls,
   }) async {
     try {
-      final url = Uri.parse('$orderServiceUrl/$orderId/exchange');
+      final url = Uri.parse('$orderServiceUrl/orders/$orderId/exchange');
       final response = await client.post(
         url,
         headers: _getHeaders(),
@@ -1033,18 +1061,24 @@ class ApiService {
   Future<Map<String, dynamic>> checkIn(String userId) async {
     try {
       final response = await client.post(
-        Uri.parse('$userServiceUrl/$userId/checkin'),
+        Uri.parse('$userServiceUrl/users/$userId/checkin'),
         headers: _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
+      } else if (response.statusCode == 400) {
+        // 400 is used for business logic errors like "Already checked in"
+        final error = json.decode(response.body);
+        final errorMessage = error['error']?['message'] ?? error['message'] ?? '출석체크에 실패했습니다';
+        throw Exception(errorMessage);
       } else {
         final error = json.decode(response.body);
         throw Exception(error['message'] ?? '출석체크에 실패했습니다');
       }
     } catch (e) {
-      if (e.toString().contains('이미 출석')) {
+      // If it's already an Exception with a specific message, rethrow it
+      if (e is Exception && e.toString().contains('Exception:')) {
         rethrow;
       }
       throw Exception('네트워크 오류: $e');
@@ -1055,7 +1089,7 @@ class ApiService {
   Future<Map<String, dynamic>> getCheckinStatus(String userId) async {
     try {
       final response = await client.get(
-        Uri.parse('$userServiceUrl/$userId/checkin/status'),
+        Uri.parse('$userServiceUrl/users/$userId/checkin/status'),
         headers: _getHeaders(),
       );
 
@@ -1077,7 +1111,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.get(
-        Uri.parse('$userServiceUrl/$userId/checkin/calendar?year=$year&month=$month'),
+        Uri.parse('$userServiceUrl/users/$userId/checkin/calendar?year=$year&month=$month'),
         headers: _getHeaders(),
       );
 
@@ -1095,7 +1129,7 @@ class ApiService {
   Future<Map<String, dynamic>> getCheckinStats(String userId) async {
     try {
       final response = await client.get(
-        Uri.parse('$userServiceUrl/$userId/checkin/stats'),
+        Uri.parse('$userServiceUrl/users/$userId/checkin/stats'),
         headers: _getHeaders(),
       );
 

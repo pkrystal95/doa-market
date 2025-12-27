@@ -56,7 +56,17 @@ class CheckinProvider with ChangeNotifier {
       notifyListeners();
       return null;
     } catch (e) {
-      _error = e.toString().replaceAll('Exception: ', '');
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+
+      // "Already checked in" is not an error, just silently update status
+      if (errorMessage.contains('이미 출석')) {
+        await fetchCheckinStatus(userId);
+        _isCheckingIn = false;
+        notifyListeners();
+        return null;
+      }
+
+      _error = errorMessage;
       _isCheckingIn = false;
       notifyListeners();
       debugPrint('Error checking in: $e');

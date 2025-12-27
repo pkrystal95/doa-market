@@ -174,7 +174,7 @@ DOA Market 신규 회원 가입 이벤트를 진행합니다!
         category: 'event',
         isPinned: true,
         createdAt: now.subtract(const Duration(days: 1)),
-        viewCount: 3421,
+        views: 3421,
       ),
       Notice(
         id: '3',
@@ -198,7 +198,7 @@ DOA Market 신규 회원 가입 이벤트를 진행합니다!
         category: 'maintenance',
         isPinned: false,
         createdAt: now.subtract(const Duration(days: 5)),
-        viewCount: 856,
+        views: 856,
       ),
       Notice(
         id: '4',
@@ -225,7 +225,7 @@ App Store / Google Play에서 앱 업데이트를 진행해주세요.
         category: 'update',
         isPinned: false,
         createdAt: now.subtract(const Duration(days: 7)),
-        viewCount: 2103,
+        views: 2103,
       ),
       Notice(
         id: '5',
@@ -250,7 +250,7 @@ App Store / Google Play에서 앱 업데이트를 진행해주세요.
         category: 'announcement',
         isPinned: false,
         createdAt: now.subtract(const Duration(days: 10)),
-        viewCount: 645,
+        views: 645,
       ),
       Notice(
         id: '6',
@@ -271,7 +271,7 @@ App Store / Google Play에서 앱 업데이트를 진행해주세요.
         category: 'event',
         isPinned: false,
         createdAt: now.subtract(const Duration(days: 12)),
-        viewCount: 5234,
+        views: 5234,
       ),
       Notice(
         id: '7',
@@ -292,7 +292,7 @@ App Store / Google Play에서 앱 업데이트를 진행해주세요.
         category: 'announcement',
         isPinned: false,
         createdAt: now.subtract(const Duration(days: 15)),
-        viewCount: 432,
+        views: 432,
       ),
     ];
   }

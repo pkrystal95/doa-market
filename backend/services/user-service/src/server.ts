@@ -46,8 +46,10 @@ app.get('/', (req, res) => {
 app.use('/api/v1/profiles', userProfileRoutes);
 import userTierRoutes from '@routes/user-tier.routes';
 import userActivityRoutes from '@routes/user-activity.routes';
+import checkinRoutes from '@routes/checkin.routes';
 app.use('/api/v1/tiers', userTierRoutes);
 app.use('/api/v1/activities', userActivityRoutes);
+app.use('/api/v1/users', checkinRoutes);
 
 // Error handlers
 app.use(notFoundHandler);

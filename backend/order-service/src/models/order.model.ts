@@ -1,16 +1,16 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import { sequelize } from '../config/database';
 import OrderItem from './order-item.model';
 
-class Order extends Model {
-  public id!: string;
-  public orderNumber!: string;
-  public userId!: string;
-  public sellerId!: string;
-  public status!: string;
-  public totalAmount!: number;
-  public paymentStatus!: string;
-  public shippingAddress?: any;
+class Order extends Model<InferAttributes<Order>, InferCreationAttributes<Order>> {
+  declare id: CreationOptional<string>;
+  declare orderNumber: string;
+  declare userId: string;
+  declare sellerId: string | null;
+  declare status: string;
+  declare totalAmount: number;
+  declare paymentStatus: string;
+  declare shippingAddress?: any;
 }
 
 Order.init(
@@ -18,7 +18,7 @@ Order.init(
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     orderNumber: { type: DataTypes.STRING(50), unique: true },
     userId: { type: DataTypes.UUID, allowNull: false },
-    sellerId: { type: DataTypes.UUID, allowNull: false },
+    sellerId: { type: DataTypes.UUID, allowNull: true },
     status: {
       type: DataTypes.ENUM('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'),
       defaultValue: 'pending',

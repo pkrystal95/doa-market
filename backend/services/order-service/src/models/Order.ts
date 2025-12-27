@@ -37,8 +37,8 @@ export class Order {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ name: 'seller_id', type: 'uuid' })
-  sellerId: string;
+  @Column({ name: 'seller_id', type: 'uuid', nullable: true })
+  sellerId: string | null;
 
   @Column({
     type: 'enum',

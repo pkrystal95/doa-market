@@ -32,25 +32,29 @@ export class EventBus {
         durable: true,
       });
 
-      this.isConnected = true;
       console.log(`[EventBus] Connected to RabbitMQ exchange: ${this.config.exchange}`);
 
-      // Handle connection errors
-      this.connection.on('error', (err) => {
+      // Handle connection errors (only for future errors, not connection errors)
+      this.connection.once('error', (err) => {
         console.error('[EventBus] Connection error:', err);
         this.isConnected = false;
       });
 
-      this.connection.on('close', () => {
+      this.connection.once('close', () => {
         console.log('[EventBus] Connection closed');
         this.isConnected = false;
         // Attempt reconnection
         setTimeout(() => this.connect(), 5000);
       });
+
+      // Set connected flag after everything is set up
+      this.isConnected = true;
     } catch (error) {
       console.error('[EventBus] Failed to connect:', error);
+      this.isConnected = false;
       // Retry connection
       setTimeout(() => this.connect(), 5000);
+      throw error;
     }
   }
 

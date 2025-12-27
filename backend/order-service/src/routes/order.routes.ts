@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import Order from '../models/order.model';
 import { eventBus } from '../index';
 import { EventType } from '../events';
@@ -24,10 +25,14 @@ router.post('/', async (req, res) => {
   try {
     const { userId, items, totalAmount, shippingAddress } = req.body;
 
+    // Generate UUID for order
+    const orderId = uuidv4();
+
     // Create order
     const order = await Order.create({
+      id: orderId,
       userId,
-      sellerId: items[0]?.sellerId || 'default-seller',
+      sellerId: items[0]?.sellerId || null,
       totalAmount,
       orderNumber: `ORD-${Date.now()}`,
       status: 'pending',
@@ -53,18 +58,18 @@ router.post('/', async (req, res) => {
 
     logger.info(`ORDER_CREATED event published for order: ${order.id}`);
 
-    // Start Saga orchestration
-    const saga = new OrderSaga(order.id, eventBus);
-    activeSagas.set(order.id, saga);
+    // DISABLED: Start Saga orchestration (재고 서비스가 없어서 일시 비활성화)
+    // const saga = new OrderSaga(order.id, eventBus);
+    // activeSagas.set(order.id, saga);
 
-    // Run saga asynchronously (don't block response)
-    saga.start().then(() => {
-      logger.info(`Saga completed successfully for order: ${order.id}`);
-      activeSagas.delete(order.id);
-    }).catch((error) => {
-      logger.error(`Saga failed for order: ${order.id}`, error);
-      activeSagas.delete(order.id);
-    });
+    // // Run saga asynchronously (don't block response)
+    // saga.start().then(() => {
+    //   logger.info(`Saga completed successfully for order: ${order.id}`);
+    //   activeSagas.delete(order.id);
+    // }).catch((error) => {
+    //   logger.error(`Saga failed for order: ${order.id}`, error);
+    //   activeSagas.delete(order.id);
+    // });
 
     res.status(201).json({
       success: true,

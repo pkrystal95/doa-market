@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isAuthenticated = false;
@@ -16,7 +16,9 @@ class AuthProvider with ChangeNotifier {
   String? get userEmail => _userEmail;
   String? get userName => _userName;
 
-  static const String apiGatewayUrl = 'https://192.168.0.19/api/v1';
+  // API Gateway를 사용하지 않고 auth service에 직접 연결 (임시)
+  static const String authDirectUrl = 'http://localhost:3001/api/v1';
+  static const String apiGatewayUrl = ApiService.baseUrl;
 
   AuthProvider() {
     _loadAuth();
@@ -34,8 +36,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse('$apiGatewayUrl/auth/login'),
+      final response = await ApiService.client.post(
+        Uri.parse('$authDirectUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,
@@ -53,12 +55,12 @@ class AuthProvider with ChangeNotifier {
           // Save to local storage
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', accessToken);
-          await prefs.setString('userId', user['userId']);
+          await prefs.setString('userId', user['id']); // 'userId' -> 'id'로 수정
           await prefs.setString('userEmail', user['email']);
           await prefs.setString('userName', user['name'] ?? user['email']);
 
           _token = accessToken;
-          _userId = user['userId'];
+          _userId = user['id']; // 'userId' -> 'id'로 수정
           _userEmail = user['email'];
           _userName = user['name'] ?? user['email'];
           _isAuthenticated = true;
@@ -77,8 +79,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> register(String email, String password, String name) async {
     try {
-      final response = await http.post(
-        Uri.parse('$apiGatewayUrl/auth/register'),
+      final response = await ApiService.client.post(
+        Uri.parse('$authDirectUrl/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,

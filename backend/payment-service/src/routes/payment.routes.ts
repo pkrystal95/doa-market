@@ -31,20 +31,30 @@ router.post('/prepare', async (req, res) => {
 
     // KG Inicis 연동을 위한 파라미터 생성
     // 실제 운영시에는 이니시스에서 발급받은 MID, 인증키 등을 사용해야 합니다
+    const timestamp = new Date().getTime().toString();
+    const mid = process.env.INICIS_MID || 'INIpayTest';
+
+    // Hash 생성 (P_CHKFAKE) - 실제로는 SHA512 hash 필요
+    // 대상: P_AMT + P_OID + P_TIMESTAMP + HashKey
+    // 테스트 환경에서는 간단한 값 사용
+    const hashKey = process.env.INICIS_HASH_KEY || '';
+    const hashData = `${amount}${orderId}${timestamp}${hashKey}`;
+    // 실제로는: crypto.createHash('sha512').update(hashData).digest('base64')
+
     const inicisParams = {
-      version: '1.0',
-      mid: process.env.INICIS_MID || 'INIpayTest', // 테스트 MID
-      oid: orderId, // 주문번호
-      price: amount.toString(),
-      timestamp: new Date().getTime().toString(),
-      use_chkfake: 'Y',
-      currency: 'WON',
-      goodname: productName,
-      buyername: '구매자', // 실제로는 사용자 정보를 받아야 함
-      buyertel: '010-0000-0000', // 실제로는 사용자 정보를 받아야 함
-      buyeremail: 'test@test.com', // 실제로는 사용자 정보를 받아야 함
-      returnUrl: `http://localhost:3006/api/v1/payments/callback`,
-      closeUrl: `http://localhost:8081/checkout`,
+      P_INI_PAYMENT: 'CARD', // 결제수단 (CARD, VBANK, MOBILE 등)
+      P_MID: mid, // 상점아이디
+      P_OID: orderId, // 주문번호 (Unique)
+      P_AMT: amount.toString(), // 결제금액
+      P_GOODS: productName, // 상품명
+      P_UNAME: '구매자', // 구매자명
+      P_MOBILE: '01012345678', // 구매자 휴대폰
+      P_EMAIL: 'test@test.com', // 구매자 이메일
+      P_NEXT_URL: `http://localhost:3005/api/v1/payments/callback`, // 결과수신 URL
+      P_NOTI_URL: `http://localhost:3005/api/v1/payments/noti`, // 가상계좌 입금통보 URL
+      P_TIMESTAMP: timestamp, // 타임스탬프
+      P_RESERVED: 'centerCd=Y&below1000=Y&vbank_receipt=Y&iosapp=Y&app_scheme=doamarket://', // 추가옵션 (iOS 앱 스키마 포함)
+      P_NOTI: paymentId, // 가맹점 임의 데이터
     };
 
     // Payment 레코드 생성

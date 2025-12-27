@@ -113,25 +113,25 @@ interface ServiceConfig {
 
 const services: ServiceConfig[] = [
   // Auth service - no auth required (handles its own auth)
-  { path: "/api/v1/auth", target: "http://localhost:3001", auth: "none" },
+  { path: "/api/v1/auth", target: "http://auth-service:3001", auth: "none" },
 
-  // User service - auth required
-  { path: "/api/v1/users", target: "http://localhost:3002", auth: "required" },
+  // User service - auth optional (checkin can be viewed by anyone)
+  { path: "/api/v1/users", target: "http://user-service:3002", auth: "optional" },
   {
     path: "/api/v1/profiles",
-    target: "http://localhost:3002",
+    target: "http://user-service:3002",
     auth: "required",
   },
 
   // Product service - optional auth (public browsing, auth for modifications) + caching
   {
     path: "/api/v1/products",
-    target: "http://localhost:3003",
+    target: "http://product-service:3003",
     auth: "optional",
   },
   {
     path: "/api/v1/categories",
-    target: "http://localhost:3003",
+    target: "http://product-service:3003",
     auth: "optional",
   },
 

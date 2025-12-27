@@ -100,6 +100,9 @@ const startServer = async () => {
     await eventBus.connect();
     logger.info('Event Bus connected');
 
+    // Wait a bit for connection to stabilize
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // Subscribe to events
     await eventBus.subscribe(EventType.ORDER_CREATED, handleOrderCreated);
     logger.info('Subscribed to ORDER_CREATED event');

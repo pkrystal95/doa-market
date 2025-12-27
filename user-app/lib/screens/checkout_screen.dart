@@ -8,6 +8,7 @@ import '../providers/address_provider.dart';
 import '../providers/point_provider.dart';
 import '../models/address.dart';
 import '../services/api_service.dart';
+import 'payment_webview_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -223,6 +224,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
 
       // 1. Create order
+      print('=== CHECKOUT: Starting order creation ===');
       final orderItems = cartProvider.items.map((item) => {
         'productId': item.product.id,
         'productName': item.product.name,
@@ -231,22 +233,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'totalPrice': item.totalPrice,
       }).toList();
 
+      print('CHECKOUT: Order items: $orderItems');
+      print('CHECKOUT: Total amount: ${cartProvider.totalAmount}');
+
       final orderResponse = await _apiService.createOrder(
         userId: authProvider.userId!,
         items: orderItems,
         shippingAddress: shippingAddress,
+        totalAmount: cartProvider.totalAmount.toDouble(),
       );
+
+      print('CHECKOUT: Order response: $orderResponse');
 
       if (orderResponse['success'] != true) {
         throw Exception('주문 생성에 실패했습니다');
       }
 
       final orderId = orderResponse['data']['id'];
+      print('CHECKOUT: Order created with ID: $orderId');
+
       final totalAmount = cartProvider.totalAmount;
       final finalAmount = totalAmount - _usedPoints;
+      print('CHECKOUT: Total amount: $totalAmount, Used points: $_usedPoints, Final amount: $finalAmount');
 
       // 2. Use points if any
       if (_usedPoints > 0) {
+        print('CHECKOUT: Using points...');
         final pointProvider = Provider.of<PointProvider>(context, listen: false);
         final pointsUsed = await pointProvider.usePoints(
           userId: authProvider.userId!,
@@ -254,12 +266,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           orderId: orderId,
         );
 
+        print('CHECKOUT: Points used result: $pointsUsed');
         if (!pointsUsed) {
           throw Exception('포인트 사용에 실패했습니다');
         }
       }
 
       // 3. Prepare payment
+      print('=== CHECKOUT: Preparing payment ===');
+      print('CHECKOUT: Payment params - orderId: $orderId, userId: ${authProvider.userId}, amount: ${finalAmount.toInt().toDouble()}');
+
       final paymentResponse = await _apiService.preparePayment(
         orderId: orderId,
         userId: authProvider.userId!,
@@ -269,14 +285,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             : '${cartProvider.items[0].product.name} 외 ${cartProvider.items.length - 1}건',
       );
 
+      print('CHECKOUT: Payment response: $paymentResponse');
+
       if (paymentResponse['success'] != true) {
         throw Exception('결제 준비에 실패했습니다');
       }
 
       // 4. Open KG Inicis payment page
+      print('CHECKOUT: Opening payment window...');
       await _openPaymentWindow(paymentResponse['data']);
+      print('CHECKOUT: Payment window opened');
 
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('=== CHECKOUT ERROR ===');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -295,31 +318,78 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _openPaymentWindow(Map<String, dynamic> paymentData) async {
-    // Note: In production, you would handle the payment callback
-    // For now, show a message
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Text('결제 진행 중'),
-          content: Text(kIsWeb
-            ? '새 창에서 결제를 진행해주세요.\n결제 완료 후 이 화면으로 돌아옵니다.'
-            : '모바일 결제 페이지로 이동합니다.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(context); // Go back to cart
-                final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                cartProvider.clear();
-                Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-              },
-              child: const Text('확인'),
-            ),
-          ],
+    if (!mounted) return;
+
+    // Open payment webview
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentWebViewScreen(
+          paymentData: paymentData,
+          onPaymentComplete: (result) async {
+            // Handle payment completion
+            await _handlePaymentComplete(result);
+            if (mounted) {
+              Navigator.pop(context, result);
+            }
+          },
+          onPaymentError: (error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(error),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              Navigator.pop(context);
+            }
+          },
         ),
+      ),
+    );
+
+    // Handle result
+    if (result != null && result['status'] == 'success') {
+      if (mounted) {
+        // Clear cart
+        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+        await cartProvider.clear();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('결제가 완료되었습니다!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to home
+        Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+      }
+    }
+  }
+
+  Future<void> _handlePaymentComplete(Map<String, dynamic> result) async {
+    try {
+      final paymentId = result['paymentId'];
+      final transactionId = result['transactionId'];
+      final status = result['status'];
+
+      // Call backend to complete payment
+      await _apiService.completePayment(
+        paymentId: paymentId,
+        transactionId: transactionId,
+        status: status,
       );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('결제 완료 처리 중 오류: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 

@@ -11,6 +11,7 @@ import {
   BarChart as BarChartIcon,
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
 
 export interface NavItem {
@@ -41,6 +42,11 @@ export const navConfig: NavItem[] = [
     title: '상품 관리',
     path: '/products',
     icon: InventoryIcon,
+  },
+  {
+    title: '카테고리 관리',
+    path: '/categories',
+    icon: CategoryIcon,
   },
   {
     title: '주문 관리',

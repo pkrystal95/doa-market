@@ -20,7 +20,10 @@ class _DailyCheckinScreenState extends State<DailyCheckinScreen>
   void initState() {
     super.initState();
     _initAnimation();
-    _loadCheckinData();
+    // Defer data loading until after the first frame to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCheckinData();
+    });
   }
 
   void _initAnimation() {
@@ -302,7 +305,7 @@ class _DailyCheckinScreenState extends State<DailyCheckinScreen>
   }
 
   Widget _buildNextBonusCard(CheckinProvider provider) {
-    if (!provider.checkinStatus!.hasNextBonus) {
+    if (provider.checkinStatus == null || !provider.checkinStatus!.hasNextBonus) {
       return const SizedBox.shrink();
     }
 

@@ -203,7 +203,7 @@ services:
     restart: unless-stopped
 
   user-service:
-    build: ./backend/user-service
+    build: ./backend/services/user-service
     container_name: doa-user-service
     environment:
       PORT: 3002

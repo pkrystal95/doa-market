@@ -87,6 +87,56 @@ export class PaymentController {
       res.status(400).json({ success: false, error: error.message });
     }
   }
+
+  async preparePayment(req: Request, res: Response): Promise<void> {
+    try {
+      const { orderId, userId, amount, productName, method } = req.body;
+      if (!orderId || !userId || !amount || !productName) {
+        res.status(400).json({
+          success: false,
+          error: 'OrderId, userId, amount, and productName are required'
+        });
+        return;
+      }
+      const paymentData = await paymentService.preparePayment({
+        orderId,
+        userId,
+        amount,
+        productName,
+        method,
+      });
+      res.status(201).json({ success: true, data: paymentData });
+    } catch (error: any) {
+      logger.error('Error preparing payment:', error);
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
+
+  async completePayment(req: Request, res: Response): Promise<void> {
+    try {
+      const { paymentId } = req.params;
+      const { transactionId, status, cardNumber, cardType, cardIssuer, pgResponse } = req.body;
+      if (!transactionId || !status) {
+        res.status(400).json({
+          success: false,
+          error: 'TransactionId and status are required'
+        });
+        return;
+      }
+      const payment = await paymentService.completePayment(paymentId, {
+        transactionId,
+        status,
+        cardNumber,
+        cardType,
+        cardIssuer,
+        pgResponse,
+      });
+      res.json({ success: true, data: payment });
+    } catch (error: any) {
+      logger.error('Error completing payment:', error);
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
 }
 
 export const paymentController = new PaymentController();

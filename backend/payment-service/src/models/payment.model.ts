@@ -1,14 +1,14 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import { sequelize } from '../config/database';
 
-class Payment extends Model {
-  public id!: string;
-  public orderId!: string;
-  public amount!: number;
-  public method!: string;
-  public status!: string;
-  public pgTransactionId?: string;
-  public paidAt?: Date;
+class Payment extends Model<InferAttributes<Payment>, InferCreationAttributes<Payment>> {
+  declare id: CreationOptional<string>;
+  declare orderId: string;
+  declare amount: number;
+  declare method: string;
+  declare status: string;
+  declare pgTransactionId: CreationOptional<string | null>;
+  declare paidAt: CreationOptional<Date | null>;
 }
 
 Payment.init(

@@ -45,5 +45,75 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- URL Scheme for app return -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.example.doaMarketUser</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>doamarket</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Payment App Schemes (KG Inicis) -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<!-- 카드사 앱 -->
+		<string>shinhan-sr-ansimclick</string>
+		<string>shc-ansimclick</string>
+		<string>smshinhanansimclick</string>
+		<string>hdcardappcardansimclick</string>
+		<string>smhyundaiansimclick</string>
+		<string>mpocket.online.ansimclick</string>
+		<string>monimopay</string>
+		<string>scardcertiapp</string>
+		<string>cloudpay</string>
+		<string>hanaskcardmobileportal</string>
+		<string>nhallonepayansimclick</string>
+		<string>nonghyupcardansimclick</string>
+		<string>kb-acp</string>
+		<string>kbbank</string>
+		<string>liivbank</string>
+		<string>newliiv</string>
+		<string>newsmartpib</string>
+		<string>com.wooricard.wcard</string>
+		<string>wooripay</string>
+		<string>citimobileapp</string>
+		<string>lotteappcard</string>
+		<string>lottesmartpay</string>
+		<!-- ISP/페이 -->
+		<string>ispmobile</string>
+		<string>payco</string>
+		<string>kakaotalk</string>
+		<string>lpayapp</string>
+		<string>lmslpay</string>
+		<string>shinsegaeeasypayment</string>
+		<string>supertoss</string>
+		<string>tmoneypay</string>
+		<string>chai</string>
+		<string>tswansimclick</string>
+		<string>uppay</string>
+		<string>kakaobank</string>
+		<string>naversearchapp</string>
+		<!-- 뱅크페이 -->
+		<string>kftc-bankpay</string>
+		<string>bankwallet</string>
+		<string>kb-bankpay</string>
+		<string>keb-bankpay</string>
+		<string>nhb-bankpay</string>
+		<string>nh-bankpay</string>
+		<string>wr-bankpay</string>
+		<string>s-bankpay</string>
+		<string>sc-bankpay</string>
+		<string>bnk-bankpay</string>
+		<string>kbn-bankpay</string>
+		<string>kkb-bankpay</string>
+	</array>
 </dict>
 </plist>

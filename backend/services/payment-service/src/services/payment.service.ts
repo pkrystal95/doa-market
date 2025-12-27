@@ -14,6 +14,23 @@ export interface CreatePaymentInput {
   cardIssuer?: string;
 }
 
+export interface PreparePaymentInput {
+  orderId: string;
+  userId: string;
+  amount: number;
+  productName: string;
+  method?: string;
+}
+
+export interface CompletePaymentInput {
+  transactionId: string;
+  status: string;
+  cardNumber?: string;
+  cardType?: string;
+  cardIssuer?: string;
+  pgResponse?: any;
+}
+
 export class PaymentService {
   private repository: Repository<Payment>;
 
@@ -78,6 +95,86 @@ export class PaymentService {
 
     await this.repository.save(payment);
     logger.info(`Payment processed: ${paymentId} - Status: ${payment.status}`);
+
+    return payment;
+  }
+
+  async preparePayment(input: PreparePaymentInput): Promise<any> {
+    // Check if payment already exists for this order
+    const existingPayment = await this.repository.findOne({
+      where: { orderId: input.orderId },
+    });
+
+    if (existingPayment) {
+      throw new Error('Payment already exists for this order');
+    }
+
+    // Create payment record
+    const payment = this.repository.create({
+      paymentId: uuidv4(),
+      orderId: input.orderId,
+      userId: input.userId,
+      amount: input.amount,
+      paymentMethod: PaymentMethod.CREDIT_CARD, // Default to credit card
+      status: PaymentStatus.PENDING,
+      currency: 'KRW',
+      pgProvider: 'KG_INICIS',
+      metadata: { productName: input.productName },
+    });
+
+    await this.repository.save(payment);
+    logger.info(`Payment prepared: ${payment.paymentId} for order: ${input.orderId}`);
+
+    // Return payment data for KG Inicis
+    return {
+      paymentId: payment.paymentId,
+      orderId: payment.orderId,
+      amount: payment.amount,
+      productName: input.productName,
+      userId: input.userId,
+      // KG Inicis test credentials (테스트용)
+      merchantId: 'INIpayTest',
+      merchantKey: 'test_key',
+      returnUrl: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/payment/callback`,
+    };
+  }
+
+  async completePayment(paymentId: string, input: CompletePaymentInput): Promise<Payment> {
+    const payment = await this.repository.findOne({ where: { paymentId } });
+
+    if (!payment) {
+      throw new Error('Payment not found');
+    }
+
+    if (payment.status !== PaymentStatus.PENDING) {
+      throw new Error('Payment is not in pending status');
+    }
+
+    // Update payment based on PG response
+    if (input.status === 'success' || input.status === 'completed') {
+      payment.status = PaymentStatus.COMPLETED;
+      payment.paidAt = new Date();
+      payment.pgTransactionId = input.transactionId;
+      payment.pgResponse = input.pgResponse || { status: input.status };
+      payment.receiptUrl = `https://inipay.com/receipt/${input.transactionId}`;
+
+      if (input.cardNumber) {
+        payment.cardNumber = this.maskCardNumber(input.cardNumber);
+      }
+      if (input.cardType) {
+        payment.cardType = input.cardType;
+      }
+      if (input.cardIssuer) {
+        payment.cardIssuer = input.cardIssuer;
+      }
+    } else {
+      payment.status = PaymentStatus.FAILED;
+      payment.failureReason = input.pgResponse?.message || 'Payment failed';
+      payment.pgResponse = input.pgResponse || { status: input.status };
+    }
+
+    await this.repository.save(payment);
+    logger.info(`Payment completed: ${paymentId} - Status: ${payment.status}`);
 
     return payment;
   }

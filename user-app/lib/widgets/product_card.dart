@@ -38,7 +38,7 @@ class ProductCard extends StatelessWidget {
           children: [
             // Product image
             Expanded(
-              flex: 3,
+              flex: 5,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -52,20 +52,10 @@ class ProductCard extends StatelessWidget {
 
             // Product info
             Expanded(
-              flex: 2,
+              flex: 4,
               child: Padding(
-                padding: AppSpacing.paddingSM,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: _buildProductInfo(isDark),
-                    ),
-                    if (showActions && !isOutOfStock && onAddToCart != null)
-                      _buildAddToCartButton(isDark),
-                  ],
-                ),
+                padding: const EdgeInsets.all(8.0),
+                child: _buildProductInfo(isDark),
               ),
             ),
           ],
@@ -166,42 +156,68 @@ class ProductCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // 상품명
+        Flexible(
+          child: Text(
+            product.name ?? '',
+            style: AppTypography.bodySmall.copyWith(
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              fontSize: 12,
+              height: 1.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(height: 4),
+
+        // 가격 (더 크고 강조)
         Text(
-          product.name ?? '',
-          style: AppTypography.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
+          '${(product.price ?? 0).toStringAsFixed(0)}원',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            height: 1.0,
+          ),
+        ),
+        const SizedBox(height: 3),
+
+        // 배송 정보
+        Row(
+          children: [
+            Icon(
+              Icons.local_shipping_outlined,
+              size: 10,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 2),
+            Text(
+              '무료배송',
+              style: TextStyle(
+                fontSize: 10,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
+                height: 1.0,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+
+        // 판매자 정보
+        Text(
+          '판매자: ${product.sellerId}',
+          style: TextStyle(
+            fontSize: 9,
+            color: isDark ? AppColors.textTertiaryDark : AppColors.textTertiary,
+            height: 1.0,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        PriceText(
-          price: product.price ?? 0,
-          size: PriceTextSize.small,
         ),
       ],
     );
   }
 
-  Widget _buildAddToCartButton(bool isDark) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onAddToCart,
-        icon: const Icon(Icons.add_shopping_cart, size: AppSpacing.iconXS),
-        label: Text(
-          '담기',
-          style: AppTypography.labelSmall,
-        ),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          minimumSize: const Size(0, AppSpacing.buttonHeightSM),
-        ),
-      ),
-    );
-  }
 }

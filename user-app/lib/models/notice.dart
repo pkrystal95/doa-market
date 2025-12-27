@@ -85,4 +85,7 @@ class Notice {
   bool get isUrgent => priority == 'urgent';
 
   bool get hasAttachments => attachments != null && attachments!.isNotEmpty;
+
+  // viewCount getter 추가 (views 필드와 동일)
+  int get viewCount => views;
 }

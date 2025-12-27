@@ -18,7 +18,7 @@ export interface CreateOrderItemInput {
 
 export interface CreateOrderInput {
   userId: string;
-  sellerId: string;
+  sellerId?: string;
   items: CreateOrderItemInput[];
   shippingFee?: number;
   discountAmount?: number;
@@ -81,7 +81,7 @@ export class OrderService {
     const order = this.orderRepository.create({
       orderId,
       userId: input.userId,
-      sellerId: input.sellerId,
+      sellerId: input.sellerId || null,
       status: OrderStatus.PENDING,
       paymentStatus: PaymentStatus.PENDING,
       subtotal,

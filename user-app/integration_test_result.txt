@@ -1,0 +1,1475 @@
+00:00 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:01 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:02 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:03 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:04 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     Running Xcode build...                                          00:05 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:06 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:07 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:08 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:09 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:10 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:11 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:12 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:13 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:14 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:15 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:16 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:17 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:18 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:19 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     
+Xcode build done.                                           14.6s
+00:20 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:21 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:22 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:23 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:24 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:25 +0: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                     00:25 +0: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                   00:26 +0: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                   00:27 +0: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                   00:28 +0: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                   00:28 +0: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                   
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#7caa2 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#bd563 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#6ce23 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#6ba64 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#8800b relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#d8d33 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (6) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:31 +0 -1: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시 [E]                                                                                                                                                            
+  Test failed. See exception logs above.
+  The test description was: 앱 시작 및 스플래시 화면 표시
+  
+
+To run this test again: /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart test /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart -p vm --plain-name '앱 통합 테스트 앱 시작 및 스플래시 화면 표시'
+00:31 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:32 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:33 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:34 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:35 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:36 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:37 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:38 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:39 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:40 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  00:40 +0 -1: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#21bf5 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#878ac relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#e3f2d relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#da3c4 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#a2d9e relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#35918 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:43 +0 -1: 앱 통합 테스트 로그인 화면 UI 요소 확인                                                                                                                                                                  
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <false>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart:30:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart line 30
+The test description was:
+  로그인 화면 UI 요소 확인
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (7) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:43 +0 -2: 앱 통합 테스트 로그인 화면 UI 요소 확인 [E]                                                                                                                                                              
+  Test failed. See exception logs above.
+  The test description was: 로그인 화면 UI 요소 확인
+  
+
+To run this test again: /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart test /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart -p vm --plain-name '앱 통합 테스트 로그인 화면 UI 요소 확인'
+00:43 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:44 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:45 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:46 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:47 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:48 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:49 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:50 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:51 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:52 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:53 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        00:53 +0 -2: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#25736 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#4d3ed relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#169e3 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#63ec2 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#e5836 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#d8c92 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:56 +0 -2: 앱 통합 테스트 네비게이션 테스트                                                                                                                                                                        
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (6) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:56 +0 -3: 앱 통합 테스트 네비게이션 테스트 [E]                                                                                                                                                                    
+  Test failed. See exception logs above.
+  The test description was: 네비게이션 테스트
+  
+
+To run this test again: /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart test /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart -p vm --plain-name '앱 통합 테스트 네비게이션 테스트'
+00:56 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                00:57 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                00:58 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                00:59 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:00 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:01 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:02 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:03 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:04 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:05 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                01:05 +0 -3: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#88fed relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#30b5a relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#0794f relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#f3ae6 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#78516 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#740a0 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:08 +0 -3: UI 인터랙션 테스트 텍스트 입력 필드 상호작용                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (6) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:08 +0 -4: UI 인터랙션 테스트 텍스트 입력 필드 상호작용 [E]                                                                                                                                                            
+  Test failed. See exception logs above.
+  The test description was: 텍스트 입력 필드 상호작용
+  
+
+To run this test again: /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart test /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart -p vm --plain-name 'UI 인터랙션 테스트 텍스트 입력 필드 상호작용'
+01:08 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:09 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:10 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:11 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:12 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:13 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:14 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:15 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:16 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:17 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     01:17 +0 -4: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#6b4e8 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#189b3 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#b3e2f relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#91578 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#c8744 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#41bad relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:20 +0 -4: UI 인터랙션 테스트 버튼 탭 인터랙션                                                                                                                                                                     
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (6) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:20 +0 -5: UI 인터랙션 테스트 버튼 탭 인터랙션 [E]                                                                                                                                                                 
+  Test failed. See exception logs above.
+  The test description was: 버튼 탭 인터랙션
+  
+
+To run this test again: /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart test /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart -p vm --plain-name 'UI 인터랙션 테스트 버튼 탭 인터랙션'
+01:20 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:21 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:22 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:23 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:24 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:25 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:26 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:27 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:28 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            01:28 +0 -5: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#fba0e relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#d8e43 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#48bd0 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#592be relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#8ea85 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#6a5b7 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:30 +0 -5: loading /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart                                                                                                  
+Some possible finders for the widgets at Offset(194.7, 779.7):
+  find.byType(ClipPath)
+  find.byType(BottomNavigationBar)
+  find.byType(ScrollNotificationObserver)
+  find.byType(Scaffold)
+  find.byType(HomeScreen)
+  find.byElementType(InheritedModelElement<_ModalRouteAspect>)
+  find.byElementType(InheritedModelElement<Object>)
+Some possible finders for the widgets at Offset(193.0, 770.0):
+  find.byType(ClipPath)
+  find.byType(BottomNavigationBar)
+  find.byType(ScrollNotificationObserver)
+  find.byType(Scaffold)
+  find.byType(HomeScreen)
+  find.byElementType(InheritedModelElement<_ModalRouteAspect>)
+  find.byElementType(InheritedModelElement<Object>)
+Some possible finders for the widgets at Offset(332.3, 791.7):
+  find.text('내 정보')
+  find.widgetWithText(Transform, '내 정보')
+  find.widgetWithText(Align, '내 정보')
+  find.widgetWithText(Column, '내 정보')
+  find.widgetWithText(RawGestureDetector, '내 정보')
+  find.widgetWithText(GestureDetector, '내 정보')
+  find.byType(ClipPath)
+  find.byType(BottomNavigationBar)
+  find.byType(ScrollNotificationObserver)
+  find.byType(Scaffold)
+  find.byType(HomeScreen)
+  find.byElementType(InheritedModelElement<_ModalRouteAspect>)
+  find.byElementType(InheritedModelElement<Object>)
+01:32 +0 -5: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환                                                                                                                                                            
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (6) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:32 +0 -6: 화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환 [E]                                                                                                                                                        
+  Test failed. See exception logs above.
+  The test description was: 스플래시 화면에서 다음 화면으로 전환
+  
+
+To run this test again: /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart test /Users/krystal/workspace/doa-market/user-app/integration_test/app_flow_test.dart -p vm --plain-name '화면 전환 테스트 스플래시 화면에서 다음 화면으로 전환'
+01:32 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:33 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:34 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:35 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:36 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:37 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:38 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:39 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:40 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:41 +0 -6: Provider 상태 관리 테스트 앱이 Provider와 함께 정상 실행                                                                                                                                                  01:41 +0 -6: 앱 통합 테스트 앱 시작 및 스플래시 화면 표시                                                                                                                                                                
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#5e496 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(122.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#859e0 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(85.7, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#89f35 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(94.5, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#ab29c relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(123.0, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 28 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#31ff3 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.1, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 27 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/krystal/workspace/doa-market/user-app/lib/widgets/product_card.dart:165:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#ba4b9 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← Expanded ← Column ← Padding ← Expanded ← Column ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=1; fit=FlexFit.tight (can use size)
+  constraints: BoxConstraints(0.0<=w<=123.0, h=16.1)
+  size: Size(63.8, 16.1)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
