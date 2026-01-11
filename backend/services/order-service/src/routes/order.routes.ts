@@ -6,14 +6,14 @@ const router = Router();
 // POST /api/v1/orders - Create new order
 router.post('/', orderController.createOrder.bind(orderController));
 
-// GET /api/v1/orders/:orderId - Get order by ID
-router.get('/:orderId', orderController.getOrder.bind(orderController));
-
 // GET /api/v1/orders/user/:userId - Get orders by user ID
 router.get('/user/:userId', orderController.getOrdersByUser.bind(orderController));
 
 // GET /api/v1/orders/seller/:sellerId - Get orders by seller ID
 router.get('/seller/:sellerId', orderController.getOrdersBySeller.bind(orderController));
+
+// GET /api/v1/orders/:orderId - Get order by ID
+router.get('/:orderId', orderController.getOrder.bind(orderController));
 
 // PATCH /api/v1/orders/:orderId/status - Update order status
 router.patch('/:orderId/status', orderController.updateOrderStatus.bind(orderController));

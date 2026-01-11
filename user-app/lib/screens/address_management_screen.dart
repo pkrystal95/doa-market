@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:kpostal/kpostal.dart';
 import '../providers/auth_provider.dart';
 import '../providers/address_provider.dart';
 import '../models/address.dart';
@@ -376,11 +377,36 @@ class _AddressFormDialogState extends State<_AddressFormDialog> {
     super.dispose();
   }
 
-  void _searchAddress() {
-    // 주소 검색 기능 (추후 구현)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('주소 검색 기능은 준비 중입니다')),
-    );
+  Future<void> _searchAddress() async {
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) {
+            return KpostalView(
+              callback: (Kpostal result) {
+                if (mounted) {
+                  setState(() {
+                    _zipcodeController.text = result.postCode;
+                    _addressController.text = result.address;
+                  });
+                }
+                Navigator.pop(context);
+              },
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('주소 검색 중 오류가 발생했습니다: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _save() {
@@ -458,7 +484,9 @@ class _AddressFormDialogState extends State<_AddressFormDialog> {
                           decoration: const InputDecoration(
                             labelText: '우편번호',
                             border: OutlineInputBorder(),
+                            hintText: '직접 입력 또는 검색',
                           ),
+                          keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return '우편번호를 입력해주세요';
@@ -480,7 +508,9 @@ class _AddressFormDialogState extends State<_AddressFormDialog> {
                     decoration: const InputDecoration(
                       labelText: '주소',
                       border: OutlineInputBorder(),
+                      hintText: '직접 입력 또는 검색',
                     ),
+                    maxLines: 2,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return '주소를 입력해주세요';

@@ -43,6 +43,29 @@ export class UserService {
     const user = await this.getUserById(id);
     await user.update({ status: 'deleted' });
   }
+
+  async createUser(data: Partial<User>) {
+    const user = await User.create(data as any);
+    return user;
+  }
+
+  async getUserStats() {
+    const totalUsers = await User.count();
+    const activeUsers = await User.count({ where: { status: 'active' } });
+    const inactiveUsers = await User.count({ where: { status: 'inactive' } });
+    const deletedUsers = await User.count({ where: { status: 'deleted' } });
+
+    return {
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      deletedUsers,
+      byRole: {
+        user: await User.count({ where: { role: 'user' } }),
+        admin: await User.count({ where: { role: 'admin' } }),
+      },
+    };
+  }
 }
 
 export default new UserService();

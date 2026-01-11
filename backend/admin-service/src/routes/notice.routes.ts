@@ -77,6 +77,39 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
+ * /api/v1/admin/notices/type/{type}:
+ *   get:
+ *     summary: 타입별 공지사항 조회
+ *     tags: [Notices]
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/type/:type', async (req, res) => {
+  try {
+    const notices = await Notice.findAll({
+      where: { type: req.params.type },
+      order: [
+        ['isPinned', 'DESC'],
+        ['priority', 'DESC'],
+        ['createdAt', 'DESC']
+      ],
+    });
+
+    res.json({ success: true, data: notices });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/v1/admin/notices/{id}:
  *   get:
  *     summary: 공지사항 상세 조회
@@ -102,6 +135,32 @@ router.get('/:id', async (req, res) => {
     await notice.increment('views');
 
     res.json({ success: true, data: notice });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/notices/{id}/attachments:
+ *   get:
+ *     summary: 공지사항 첨부파일 목록
+ *     tags: [Notices]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/:id/attachments', async (req, res) => {
+  try {
+    // TODO: 첨부파일 모델과 연동
+    const attachments: any[] = [];
+    res.json({ success: true, data: attachments });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

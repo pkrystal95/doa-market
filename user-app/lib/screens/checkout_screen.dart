@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
+import 'package:kpostal/kpostal.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/address_provider.dart';
@@ -160,30 +161,51 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  void _searchAddress() {
-    if (!kIsWeb) {
-      // Mobile: Show a simple input dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('주소 검색'),
-          content: const Text('모바일에서는 수동으로 입력해주세요.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('확인'),
-            ),
-          ],
+  Future<void> _searchAddress() async {
+    print('=== 주소 검색 시작 ===');
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) {
+            print('KpostalView 빌드 시작');
+            return KpostalView(
+              callback: (Kpostal result) {
+                print('=== 주소 선택됨 ===');
+                print('우편번호: ${result.postCode}');
+                print('주소: ${result.address}');
+
+                try {
+                  if (mounted) {
+                    print('setState 시작');
+                    setState(() {
+                      _zipcodeController.text = result.postCode;
+                      _addressController.text = result.address;
+                    });
+                    print('setState 완료');
+                  }
+                  print('Navigator.pop 시작');
+                  Navigator.pop(context);
+                  print('Navigator.pop 완료');
+                } catch (e) {
+                  print('콜백 내부 오류: $e');
+                }
+              },
+            );
+          },
         ),
       );
-      return;
+      print('=== 주소 검색 완료 ===');
+    } catch (e, stackTrace) {
+      print('=== 주소 검색 오류 ===');
+      print('오류: $e');
+      print('스택 트레이스: $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('주소 검색 중 오류가 발생했습니다: $e')),
+        );
+      }
     }
-
-    // Web-only code would go here
-    // For now, just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('웹에서는 주소 검색 기능을 사용할 수 없습니다.')),
-    );
   }
 
   Future<void> _processCheckout() async {
@@ -465,14 +487,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${item.product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원 x ${item.quantity}개',
+                              '${item.product.price.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원 x ${item.quantity}개',
                               style: TextStyle(color: Colors.grey[600], fontSize: 14),
                             ),
                           ],
                         ),
                       ),
                       Text(
-                        '${item.totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                        '${item.totalPrice.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -602,7 +624,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         decoration: const InputDecoration(
                           labelText: '우편번호',
                           border: OutlineInputBorder(),
+                          hintText: '직접 입력 또는 검색',
                         ),
+                        keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return '우편번호를 입력해주세요';
@@ -624,7 +648,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   decoration: const InputDecoration(
                     labelText: '주소',
                     border: OutlineInputBorder(),
+                    hintText: '직접 입력 또는 검색',
                   ),
+                  maxLines: 2,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return '주소를 입력해주세요';
@@ -756,7 +782,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       children: [
                         const Text('상품 금액', style: TextStyle(fontSize: 16)),
                         Text(
-                          '${cartProvider.totalAmount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                          '${cartProvider.totalAmount.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],
@@ -791,7 +817,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${(cartProvider.totalAmount - _usedPoints).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                          '${(cartProvider.totalAmount - _usedPoints).toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -820,7 +846,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(
-                          '${(cartProvider.totalAmount - _usedPoints).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원 결제하기',
+                          '${(cartProvider.totalAmount - _usedPoints).toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원 결제하기',
                           style: const TextStyle(fontSize: 16),
                         ),
                 ),

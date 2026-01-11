@@ -37,7 +37,10 @@ class SearchProvider with ChangeNotifier {
       final response = await _apiService.searchProducts(keyword: keyword);
 
       if (response['success'] == true) {
-        final List<dynamic> products = response['data']['products'] ?? [];
+        // Handle product-service response format
+        final List<dynamic> products = response['data'] is List
+            ? response['data']
+            : (response['data']['products'] ?? []);
         _searchResults = products.map((p) => Product.fromJson(p)).toList();
       } else {
         _searchResults = [];

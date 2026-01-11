@@ -61,7 +61,6 @@ router.post('/prepare', async (req, res) => {
     const payment = await Payment.create({
       id: paymentId,
       orderId,
-      userId,
       amount,
       method: method || 'card',
       status: 'pending',
@@ -90,7 +89,7 @@ router.post('/prepare', async (req, res) => {
 router.post('/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
-    const { transactionId, status } = req.body;
+    const { pgTransactionId, status } = req.body;
 
     const payment = await Payment.findByPk(id);
     if (!payment) {
@@ -102,8 +101,9 @@ router.post('/:id/complete', async (req, res) => {
 
     // Update payment status
     await payment.update({
-      transactionId,
+      pgTransactionId,
       status: status || 'completed',
+      paidAt: new Date(),
     });
 
     res.json({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import '../utils/format_utils.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -128,7 +129,7 @@ class CartScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${item.product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                                    FormatUtils.formatPrice(item.product.price),
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[600],
@@ -235,7 +236,7 @@ class CartScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  '${item.totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                                  FormatUtils.formatPrice(item.totalPrice),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -277,7 +278,7 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${cart.totalAmount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                            FormatUtils.formatPrice(cart.totalAmount),
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
@@ -297,7 +298,7 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${cart.totalAmount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                            FormatUtils.formatPrice(cart.totalAmount),
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,

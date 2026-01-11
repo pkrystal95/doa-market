@@ -21,6 +21,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+    res.json({ success: true, data: order });
+  } catch (error: any) {
+    logger.error('Error fetching order:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
     const { userId, items, totalAmount, shippingAddress } = req.body;

@@ -216,6 +216,136 @@ router.patch('/:id/status', async (req, res) => {
 /**
  * @swagger
  * /api/v1/admin/inquiries/{id}:
+ *   put:
+ *     summary: 문의사항 수정
+ *     tags: [Inquiries]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: 수정 성공
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findByPk(req.params.id);
+    if (!inquiry) {
+      return res.status(404).json({ success: false, message: '문의사항을 찾을 수 없습니다.' });
+    }
+
+    await inquiry.update(req.body);
+    res.json({ success: true, data: inquiry });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/inquiries/{id}/attachments:
+ *   get:
+ *     summary: 문의사항 첨부파일 목록
+ *     tags: [Inquiries]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/:id/attachments', async (req, res) => {
+  try {
+    // TODO: 첨부파일 모델과 연동
+    const attachments: any[] = [];
+    res.json({ success: true, data: attachments });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/inquiries/seller/{sellerId}:
+ *   get:
+ *     summary: 판매자 문의 조회
+ *     tags: [Inquiries]
+ *     parameters:
+ *       - in: path
+ *         name: sellerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: include
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/seller/:sellerId', async (req, res) => {
+  try {
+    const inquiries = await Inquiry.findAll({
+      where: { senderId: req.params.sellerId, senderType: 'seller' },
+      order: [['createdAt', 'DESC']],
+    });
+    res.json({ success: true, data: inquiries });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/inquiries/seller-to-admin/{sellerId}:
+ *   get:
+ *     summary: 판매자→관리자 문의 조회
+ *     tags: [Inquiries]
+ *     parameters:
+ *       - in: path
+ *         name: sellerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: include
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/seller-to-admin/:sellerId', async (req, res) => {
+  try {
+    const inquiries = await Inquiry.findAll({
+      where: {
+        senderId: req.params.sellerId,
+        senderType: 'seller',
+        receiverType: 'admin',
+      },
+      order: [['createdAt', 'DESC']],
+    });
+    res.json({ success: true, data: inquiries });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/admin/inquiries/{id}:
  *   delete:
  *     summary: 문의사항 삭제
  *     tags: [Inquiries]

@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/cart_provider.dart';
 import '../models/product.dart';
+import '../utils/format_utils.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({Key? key}) : super(key: key);
@@ -194,10 +195,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${product.price.toString().replaceAllMapped(
-                        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                        (Match m) => '${m[1]},',
-                      )}원',
+                      FormatUtils.formatPrice(product.price),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

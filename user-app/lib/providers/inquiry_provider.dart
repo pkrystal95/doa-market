@@ -110,11 +110,12 @@ class InquiryProvider with ChangeNotifier {
         await fetchInquiries(userId);
         return true;
       }
-      return false;
+      // If success is false, throw error with message from response
+      throw Exception(response['message'] ?? '문의 등록에 실패했습니다');
     } catch (e) {
       _error = e.toString();
       debugPrint('Error creating inquiry: $e');
-      return false;
+      rethrow; // Re-throw to show error message in UI
     }
   }
 

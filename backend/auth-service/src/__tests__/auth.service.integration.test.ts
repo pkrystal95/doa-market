@@ -3,6 +3,13 @@ import User from '../models/user.model';
 import RefreshToken from '../models/refresh-token.model';
 import { AppError } from '../utils/app-error';
 
+// Mock bcrypt
+jest.mock('bcryptjs', () => ({
+  genSalt: jest.fn().mockResolvedValue('salt'),
+  hash: jest.fn().mockResolvedValue('hashedPassword'),
+  compare: jest.fn().mockResolvedValue(true),
+}));
+
 // Mock database models
 jest.mock('../models/user.model');
 jest.mock('../models/refresh-token.model');
@@ -76,7 +83,13 @@ describe('Auth Service Integration Tests', () => {
         email: loginData.email,
         name: 'Test User',
         role: 'user',
+        status: 'active',
         lastLoginAt: null,
+        password: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+        getDataValue: jest.fn((key: string) => {
+          if (key === 'password') return '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+          return (mockUser as any)[key];
+        }),
         comparePassword: jest.fn().mockResolvedValue(true),
         save: jest.fn().mockResolvedValue(true),
         toJSON: () => ({

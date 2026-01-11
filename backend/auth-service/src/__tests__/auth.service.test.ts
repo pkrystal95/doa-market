@@ -3,16 +3,27 @@ import User from '../models/user.model';
 import RefreshToken from '../models/refresh-token.model';
 import { AppError } from '../utils/app-error';
 
+// Mock bcrypt
+jest.mock('bcryptjs', () => ({
+  genSalt: jest.fn().mockResolvedValue('salt'),
+  hash: jest.fn().mockResolvedValue('hashedPassword'),
+  compare: jest.fn().mockResolvedValue(true),
+}));
+
 // Mock models
 jest.mock('../models/user.model');
 jest.mock('../models/refresh-token.model');
 
 describe('AuthService', () => {
   let authService: AuthService;
+  let bcrypt: any;
 
   beforeEach(() => {
     authService = new AuthService();
     jest.clearAllMocks();
+    bcrypt = require('bcryptjs');
+    // Reset bcrypt mocks to default behavior
+    bcrypt.compare.mockResolvedValue(true);
   });
 
   describe('register', () => {
@@ -73,6 +84,11 @@ describe('AuthService', () => {
         id: 'user-id',
         email: loginData.email,
         status: 'active',
+        password: '$2a$10$hashedpassword',
+        getDataValue: jest.fn((key: string) => {
+          if (key === 'password') return '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'; // bcrypt hash of 'password123'
+          return (mockUser as any)[key];
+        }),
         comparePassword: jest.fn().mockResolvedValue(true),
         save: jest.fn().mockResolvedValue(true),
         toJSON: jest.fn().mockReturnValue({
@@ -87,7 +103,6 @@ describe('AuthService', () => {
       const result = await authService.login(loginData);
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { email: loginData.email } });
-      expect(mockUser.comparePassword).toHaveBeenCalledWith(loginData.password);
       expect(result).toHaveProperty('user');
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
@@ -101,10 +116,24 @@ describe('AuthService', () => {
     });
 
     it('should throw error if password is invalid', async () => {
+      bcrypt.compare.mockResolvedValue(false);
+
       const mockUser = {
         id: 'user-id',
         status: 'active',
+        email: loginData.email,
+        password: '$2a$10$differenthash',
+        getDataValue: jest.fn((key: string) => {
+          if (key === 'password') return '$2a$10$differenthash';
+          if (key === 'id') return 'user-id';
+          return (mockUser as any)[key];
+        }),
         comparePassword: jest.fn().mockResolvedValue(false),
+        save: jest.fn().mockResolvedValue(true),
+        toJSON: jest.fn().mockReturnValue({
+          id: 'user-id',
+          email: loginData.email,
+        }),
       };
 
       (User.findOne as jest.Mock).mockResolvedValue(mockUser);

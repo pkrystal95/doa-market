@@ -5,6 +5,7 @@ import compression from 'compression';
 import dotenv from 'dotenv';
 import { initializeDatabase } from '@config/database';
 import orderRoutes from '@routes/order.routes';
+import partnerRoutes from '@routes/partner.routes';
 import { errorHandler, notFoundHandler } from '@middlewares/error-handler';
 import logger from '@utils/logger';
 
@@ -44,6 +45,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/orders/partner', partnerRoutes);
 
 // Error handlers
 app.use(notFoundHandler);

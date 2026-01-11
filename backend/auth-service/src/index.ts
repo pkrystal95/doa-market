@@ -7,6 +7,8 @@ import swaggerUi from 'swagger-ui-express';
 import { errorHandler } from './middleware/error-handler';
 import { notFoundHandler } from './middleware/not-found-handler';
 import authRoutes from './routes/auth.routes';
+import sellerAuthRoutes from './routes/seller-auth.routes';
+import adminAuthRoutes from './routes/admin-auth.routes';
 import { logger } from './utils/logger';
 import { sequelize } from './config/database';
 import { swaggerSpec } from './config/swagger';
@@ -45,6 +47,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 
 // Routes
 app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/sellers`, sellerAuthRoutes);
+app.use(`${API_PREFIX}/admin`, adminAuthRoutes);
 
 // Error handling
 app.use(notFoundHandler);

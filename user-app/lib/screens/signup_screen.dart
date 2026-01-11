@@ -102,7 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'DOA Market',
+                  'DOA',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontFamily: 'SchoolSafetyRoundedSmile',

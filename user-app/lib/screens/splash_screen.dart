@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'DOA Market',
+                'DOA',
                 style: TextStyle(
                   fontSize: 32,
                   fontFamily: 'SchoolSafetyRoundedSmile',

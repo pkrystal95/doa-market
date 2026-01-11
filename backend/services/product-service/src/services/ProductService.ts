@@ -102,6 +102,7 @@ export class ProductService {
     pagination: PaginationQuery
   ): Promise<{ data: ProductResponseDto[]; meta: any }> {
     try {
+      logger.info('Searching products with term:', { searchTerm, filter, pagination });
       const { page = 1, limit = 20 } = pagination;
       const from = (page - 1) * limit;
 
@@ -150,24 +151,46 @@ export class ProductService {
         });
       }
 
-      const result = await opensearchService.searchProducts(query);
+      try {
+        logger.info('Attempting OpenSearch...');
+        const result = await opensearchService.searchProducts(query);
+        logger.info('OpenSearch successful, got results:', { total: result.hits.total.value });
 
-      const productIds = result.hits.hits.map((hit: any) => hit._id);
-      const products = await productRepository.findByIds(productIds);
+        const productIds = result.hits.hits.map((hit: any) => hit._id);
+        const products = await productRepository.findByIds(productIds);
 
-      // Sort products by OpenSearch result order
-      const productMap = new Map(products.map((p) => [p.id, p]));
-      const sortedProducts = productIds.map((id: string) => productMap.get(id)).filter(Boolean);
+        // Sort products by OpenSearch result order
+        const productMap = new Map(products.map((p) => [p.id, p]));
+        const sortedProducts = productIds.map((id: string) => productMap.get(id)).filter(Boolean);
 
-      return {
-        data: sortedProducts.map((p: any) => this.transformToDto(p)),
-        meta: {
-          page,
-          limit,
-          total: result.hits.total.value,
-          totalPages: Math.ceil(result.hits.total.value / limit),
-        },
-      };
+        return {
+          data: sortedProducts.map((p: any) => this.transformToDto(p)),
+          meta: {
+            page,
+            limit,
+            total: result.hits.total.value,
+            totalPages: Math.ceil(result.hits.total.value / limit),
+          },
+        };
+      } catch (opensearchError) {
+        logger.warn('OpenSearch unavailable, falling back to database search:', opensearchError);
+
+        // Fallback to database search using LIKE
+        const searchFilter = { ...filter, search: searchTerm };
+        logger.info('Database search filter:', searchFilter);
+        const { products, total } = await productRepository.findAll(searchFilter, pagination);
+        logger.info('Database search results:', { total, count: products.length });
+
+        return {
+          data: products.map((p) => this.transformToDto(p)),
+          meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+          },
+        };
+      }
     } catch (error) {
       logger.error('Error searching products:', { searchTerm, filter, error });
       throw error;

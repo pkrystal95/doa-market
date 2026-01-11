@@ -321,4 +321,38 @@ export class OrderService {
 
     logger.info(`Order deleted: ${orderId}`);
   }
+
+  async getOrderCountsBySeller(sellerId: string): Promise<Record<string, number>> {
+    const baseQuery = this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.sellerId = :sellerId', { sellerId });
+
+    const [
+      total,
+      pending,
+      confirmed,
+      processing,
+      shipped,
+      delivered,
+      cancelled,
+    ] = await Promise.all([
+      baseQuery.getCount(),
+      baseQuery.clone().andWhere('order.status = :status', { status: OrderStatus.PENDING }).getCount(),
+      baseQuery.clone().andWhere('order.status = :status', { status: OrderStatus.CONFIRMED }).getCount(),
+      baseQuery.clone().andWhere('order.status = :status', { status: OrderStatus.PROCESSING }).getCount(),
+      baseQuery.clone().andWhere('order.status = :status', { status: OrderStatus.SHIPPED }).getCount(),
+      baseQuery.clone().andWhere('order.status = :status', { status: OrderStatus.DELIVERED }).getCount(),
+      baseQuery.clone().andWhere('order.status = :status', { status: OrderStatus.CANCELLED }).getCount(),
+    ]);
+
+    return {
+      total,
+      pending,
+      confirmed,
+      processing,
+      shipped,
+      delivered,
+      cancelled,
+    };
+  }
 }

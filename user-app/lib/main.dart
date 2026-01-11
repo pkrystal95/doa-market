@@ -39,6 +39,10 @@ import 'screens/inquiry_write_screen.dart';
 import 'screens/order_returns_screen.dart';
 import 'screens/order_cancel_request_screen.dart';
 import 'screens/daily_checkin_screen.dart';
+import 'screens/faq_screen.dart';
+import 'screens/notification_settings_screen.dart';
+import 'screens/privacy_policy_screen.dart';
+import 'screens/recently_viewed_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -70,7 +74,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp(
-            title: 'DOA Market',
+            title: 'DOA',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
@@ -100,6 +104,10 @@ class MyApp extends StatelessWidget {
               '/inquiry-write': (context) => const InquiryWriteScreen(),
               '/order-returns': (context) => const OrderReturnsScreen(),
               '/order-cancel-request': (context) => const OrderCancelRequestScreen(),
+              '/faq': (context) => const FaqScreen(),
+              '/notification-settings': (context) => const NotificationSettingsScreen(),
+              '/privacy-policy': (context) => const PrivacyPolicyScreen(),
+              '/recently-viewed': (context) => const RecentlyViewedScreen(),
             },
           );
         },

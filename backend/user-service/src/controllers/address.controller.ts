@@ -13,7 +13,7 @@ const addressSchema = z.object({
 
 export const getAddresses = async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
+    const { userId } = req.params;
     const addresses = await Address.findAll({ where: { userId }, order: [['isDefault', 'DESC'], ['createdAt', 'DESC']] });
     res.json({ success: true, data: addresses });
   } catch (error) {
@@ -23,7 +23,7 @@ export const getAddresses = async (req: Request, res: Response) => {
 
 export const createAddress = async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
+    const { userId } = req.params;
     const validationResult = addressSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ error: 'Validation failed', details: validationResult.error.errors });
@@ -44,8 +44,7 @@ export const createAddress = async (req: Request, res: Response) => {
 
 export const updateAddress = async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    const { addressId } = req.params;
+    const { userId, addressId } = req.params;
     const validationResult = addressSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ error: 'Validation failed', details: validationResult.error.errors });
@@ -71,8 +70,7 @@ export const updateAddress = async (req: Request, res: Response) => {
 
 export const deleteAddress = async (req: Request, res: Response) => {
   try {
-    const userId = req.headers['x-user-id'] as string;
-    const { addressId } = req.params;
+    const { userId, addressId } = req.params;
     const deleted = await Address.destroy({ where: { addressId, userId } });
     if (!deleted) {
       return res.status(404).json({ error: 'Address not found' });

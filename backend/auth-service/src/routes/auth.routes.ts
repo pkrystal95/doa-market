@@ -180,5 +180,62 @@ router.post('/logout', authenticate, authController.logout);
  */
 router.get('/me', authenticate, authController.getMe);
 
+/**
+ * @swagger
+ * /api/v1/auth/send-verification:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 이메일 인증 코드 발송
+ *     description: 이메일 주소로 인증 코드를 발송합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: 인증 코드 발송 성공
+ *       400:
+ *         description: 잘못된 요청
+ */
+router.post('/send-verification', authLimiter, authController.sendVerification);
+
+/**
+ * @swagger
+ * /api/v1/auth/verify-email:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 이메일 인증 코드 검증
+ *     description: 발송된 인증 코드를 검증합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 인증 성공
+ *       400:
+ *         description: 잘못된 코드 또는 만료됨
+ */
+router.post('/verify-email', authController.verifyEmail);
+
 export default router;
 

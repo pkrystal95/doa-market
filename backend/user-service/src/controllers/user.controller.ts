@@ -39,6 +39,24 @@ export class UserController {
       next(error);
     }
   }
+
+  async createUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await userService.createUser(req.body);
+      res.status(201).json({ success: true, data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getUserStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const stats = await userService.getUserStats();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new UserController();

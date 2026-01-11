@@ -39,12 +39,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('마이페이지'),
-        elevation: 0,
-      ),
-      body: ListView(
+    return ListView(
         children: [
           // 사용자 프로필 섹션
           _buildProfileSection(),
@@ -81,7 +76,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
           const SizedBox(height: 20),
         ],
-      ),
     );
   }
 
@@ -519,7 +513,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.help_outline,
             title: '자주 묻는 질문',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/faq');
+            },
           ),
           _buildMenuItem(
             icon: Icons.announcement,
@@ -563,12 +559,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildMenuItem(
             icon: Icons.notifications,
             title: '알림 설정',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/notification-settings');
+            },
           ),
           _buildMenuItem(
             icon: Icons.security,
             title: '개인정보 처리방침',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).pushNamed('/privacy-policy');
+            },
           ),
           _buildMenuItem(
             icon: Icons.logout,

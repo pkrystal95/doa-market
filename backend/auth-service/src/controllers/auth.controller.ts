@@ -21,6 +21,15 @@ const refreshSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
+const sendVerificationSchema = z.object({
+  email: z.string().email('Invalid email'),
+});
+
+const verifyEmailSchema = z.object({
+  email: z.string().email('Invalid email'),
+  code: z.string().length(6, 'Code must be 6 digits'),
+});
+
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -118,6 +127,50 @@ export class AuthController {
       });
     } catch (error) {
       next(error);
+    }
+  }
+
+  async sendVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Validate input
+      const validatedData = sendVerificationSchema.parse(req.body);
+
+      // Send verification code
+      await authService.sendVerificationCode(validatedData.email);
+
+      res.json({
+        success: true,
+        message: 'Verification code sent to email',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        next(new AppError(error.errors[0].message, 400));
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Validate input
+      const validatedData = verifyEmailSchema.parse(req.body);
+
+      // Verify code
+      await authService.verifyEmailCode(validatedData.email, validatedData.code);
+
+      res.json({
+        success: true,
+        message: 'Email verified successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        next(new AppError(error.errors[0].message, 400));
+      } else {
+        next(error);
+      }
     }
   }
 }

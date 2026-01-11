@@ -13,6 +13,7 @@ import checkinRoutes from './routes/checkin.routes';
 import inquiryRoutes from './routes/inquiry.routes';
 import reviewRoutes from './routes/review.routes';
 import noticeRoutes from './routes/notice.routes';
+import wishlistRoutes from './routes/wishlist.routes';
 import { logger } from './utils/logger';
 import { sequelize } from './config/database';
 import { swaggerSpec } from './config/swagger';
@@ -22,6 +23,7 @@ import './models/point.model';
 import './models/daily-checkin.model';
 import './models/inquiry.model';
 import './models/review.model';
+import './models/wishlist.model';
 
 dotenv.config();
 
@@ -50,6 +52,7 @@ app.use(`${API_PREFIX}/users`, checkinRoutes); // Checkin routes
 app.use(`${API_PREFIX}/users`, inquiryRoutes); // Inquiry routes
 app.use(`${API_PREFIX}/users`, reviewRoutes); // Review routes
 app.use(`${API_PREFIX}/notices`, noticeRoutes); // Notice routes (public)
+app.use(`${API_PREFIX}/wishlist`, wishlistRoutes); // Wishlist routes
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -14,6 +14,8 @@ import '../theme/app_spacing.dart';
 import '../widgets/product_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/skeleton_loader.dart';
+import 'my_page_screen.dart';
+import 'recently_viewed_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -99,19 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
 
-    // 각 탭별 네비게이션
-    switch (index) {
-      case 0: // 홈
-        break;
-      case 1: // 카테고리
-        break;
-      case 2: // 히스토리
-        Navigator.of(context).pushNamed('/orders');
-        break;
-      case 3: // 내 정보
-        Navigator.of(context).pushNamed('/mypage');
-        break;
-    }
   }
 
   @override
@@ -119,11 +108,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: _buildAppBar(),
-      body: _selectedIndex == 0
-          ? _buildHomeTab()
-          : _selectedIndex == 1
-              ? _buildCategoriesTab()
-              : Container(),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          _buildHomeTab(),
+          _buildCategoriesTab(),
+          const RecentlyViewedScreen(),
+          const MyPageScreen(),
+        ],
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -133,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       backgroundColor: Colors.white,
       title: Text(
-        'DOA Market',
+        'DOA',
         style: AppTypography.titleLarge.copyWith(
           color: AppColors.primary,
           fontWeight: FontWeight.bold,
@@ -212,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.receipt_long),
-          label: '주문내역',
+          label: '히스토리',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
@@ -992,8 +985,8 @@ class _HomeScreenState extends State<HomeScreen> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 1.5,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
               ),
               itemCount: subCategories.length,
               itemBuilder: (context, index) {
@@ -1125,11 +1118,11 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: categoryProvider.isLoadingProducts
                 ? GridView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(8),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.7,
-                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.575,
+                      crossAxisSpacing: 8,
                       mainAxisSpacing: 12,
                     ),
                     itemCount: 6,
@@ -1142,11 +1135,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         message: '이 카테고리에 등록된 상품이 없습니다',
                       )
                     : GridView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(8),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          childAspectRatio: 0.7,
-                          crossAxisSpacing: 12,
+                          childAspectRatio: 0.575,
+                          crossAxisSpacing: 8,
                           mainAxisSpacing: 12,
                         ),
                         itemCount: categoryProvider.categoryProducts.length,

@@ -6,6 +6,20 @@ const router = Router();
 
 /**
  * @swagger
+ * /api/v1/users/stats:
+ *   get:
+ *     tags: [Users]
+ *     summary: 사용자 통계 조회
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 사용자 통계 조회 성공
+ */
+router.get('/stats', userController.getUserStats);
+
+/**
+ * @swagger
  * /api/v1/users:
  *   get:
  *     tags: [Users]
@@ -23,11 +37,45 @@ const router = Router();
  *         schema:
  *           type: integer
  *         description: 페이지당 항목 수
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: 검색어
  *     responses:
  *       200:
  *         description: 사용자 목록 조회 성공
  */
 router.get('/', userController.getUsers); // Removed auth for demo
+
+/**
+ * @swagger
+ * /api/v1/users:
+ *   post:
+ *     tags: [Users]
+ *     summary: 사용자 생성
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - name
+ *             properties:
+ *               email:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: 사용자 생성 성공
+ */
+router.post('/', userController.createUser);
 
 /**
  * @swagger

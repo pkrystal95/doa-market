@@ -1,8 +1,10 @@
 import User, { UserAttributes } from '../models/user.model';
 import RefreshToken from '../models/refresh-token.model';
+import VerificationCode from '../models/verification-code.model';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken, getTokenExpirationDate, TokenPayload } from '../utils/jwt';
 import { AppError } from '../utils/app-error';
 import { logger } from '../utils/logger';
+import { Op } from 'sequelize';
 
 export interface RegisterDto {
   email: string;
@@ -230,6 +232,72 @@ export class AuthService {
     }
 
     return user.toJSON();
+  }
+
+  async sendVerificationCode(email: string): Promise<void> {
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Set expiration (10 minutes from now)
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+    // Delete any existing unverified codes for this email
+    await VerificationCode.destroy({
+      where: {
+        email,
+        verified: false,
+      },
+    });
+
+    // Create new verification code
+    await VerificationCode.create({
+      email,
+      code,
+      expiresAt,
+      verified: false,
+    });
+
+    // TODO: Send email via notification service or nodemailer
+    // For now, just log the code (in production, this should be removed)
+    logger.info(`Verification code for ${email}: ${code}`);
+
+    // In production, send email:
+    // await sendEmail({
+    //   to: email,
+    //   subject: 'Email Verification Code',
+    //   text: `Your verification code is: ${code}`,
+    // });
+  }
+
+  async verifyEmailCode(email: string, code: string): Promise<void> {
+    // Find verification code
+    const verificationCode = await VerificationCode.findOne({
+      where: {
+        email,
+        code,
+        verified: false,
+        expiresAt: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!verificationCode) {
+      throw new AppError('Invalid or expired verification code', 400);
+    }
+
+    // Mark as verified
+    verificationCode.verified = true;
+    await verificationCode.save();
+
+    // Update user's emailVerified status
+    await User.update(
+      { emailVerified: true },
+      { where: { email } }
+    );
+
+    logger.info(`Email verified: ${email}`);
   }
 }
 

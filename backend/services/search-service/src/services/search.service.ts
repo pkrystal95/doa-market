@@ -1,13 +1,16 @@
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 import { AppDataSource } from '@config/database';
 import { SearchLog } from '@models/Search';
 
 export class SearchService {
   private repository: Repository<SearchLog>;
+  private productServiceUrl: string;
 
   constructor() {
     this.repository = AppDataSource.getRepository(SearchLog);
+    this.productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002';
   }
 
   async logSearch(userId: string | null, keyword: string, resultCount: number, filters?: any): Promise<SearchLog> {
@@ -43,13 +46,38 @@ export class SearchService {
   }
 
   async searchProducts(keyword: string, filters?: any): Promise<any> {
-    // 실제 구현에서는 ElasticSearch나 다른 검색 엔진을 사용
-    // 여기서는 간단한 시뮬레이션
-    return {
-      keyword,
-      filters: filters || {},
-      results: [],
-      total: 0,
-    };
+    try {
+      // Call product-service search endpoint
+      const response = await axios.get(`${this.productServiceUrl}/api/v1/products/search`, {
+        params: {
+          search: keyword,
+          ...filters,
+        },
+      });
+
+      if (response.data.success) {
+        return {
+          keyword,
+          filters: filters || {},
+          products: response.data.data || [],
+          total: response.data.meta?.total || response.data.data?.length || 0,
+        };
+      }
+
+      return {
+        keyword,
+        filters: filters || {},
+        products: [],
+        total: 0,
+      };
+    } catch (error: any) {
+      console.error('Error searching products:', error.message);
+      return {
+        keyword,
+        filters: filters || {},
+        products: [],
+        total: 0,
+      };
+    }
   }
 }

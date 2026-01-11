@@ -46,6 +46,13 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 
+	<!-- Allow HTTP loads for Kakao Postcode Service -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
 	<!-- URL Scheme for app return -->
 	<key>CFBundleURLTypes</key>
 	<array>

@@ -199,13 +199,21 @@ class _NoticeListScreenState extends State<NoticeListScreen> {
       {'value': null, 'label': '전체'},
       {'value': '공지', 'label': '공지'},
       {'value': '이벤트', 'label': '이벤트'},
-      {'value': '점검', 'label': '점검'},
-      {'value': '업데이트', 'label': '업데이트'},
     ];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -214,16 +222,26 @@ class _NoticeListScreenState extends State<NoticeListScreen> {
                 noticeProvider.selectedCategory == category['value'];
             return Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: FilterChip(
-                label: Text(category['label'] as String),
+              child: ChoiceChip(
+                label: Text(
+                  category['label'] as String,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.grey[700],
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 14,
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (selected) {
                   noticeProvider.filterByCategory(
                     selected ? category['value'] as String? : null,
                   );
                 },
-                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                checkmarkColor: Theme.of(context).primaryColor,
+                selectedColor: Theme.of(context).primaryColor,
+                backgroundColor: Colors.grey[200],
+                elevation: isSelected ? 2 : 0,
+                pressElevation: 4,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             );
           }).toList(),
@@ -294,35 +312,6 @@ class _NoticeListScreenState extends State<NoticeListScreen> {
                     ),
                   ),
                 ),
-                if (notice.isPinned) ...[
-                  const SizedBox(width: 6),
-                  Icon(
-                    Icons.push_pin,
-                    size: 16,
-                    color: Colors.red[400],
-                  ),
-                ],
-                if (notice.isNew) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'NEW',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
                 const Spacer(),
                 Text(
                   dateFormat.format(notice.createdAt),
@@ -342,20 +331,6 @@ class _NoticeListScreenState extends State<NoticeListScreen> {
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.visibility, size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Text(
-                  NumberFormat('#,###').format(notice.viewCount),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
             ),
           ],
         ),

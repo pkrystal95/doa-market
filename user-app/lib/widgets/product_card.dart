@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/product.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../theme/app_spacing.dart';
 import 'price_text.dart';
+import '../utils/format_utils.dart';
 
 /// Reusable product card widget for displaying products in grid/list
 class ProductCard extends StatelessWidget {
@@ -29,37 +31,31 @@ class ProductCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isOutOfStock = (product.stock ?? 0) <= 0;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: isOutOfStock ? null : onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product image
-            Expanded(
-              flex: 5,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _buildProductImage(isDark, isOutOfStock),
-                  if (showActions && onToggleWishlist != null)
-                    _buildWishlistButton(),
-                  if (isOutOfStock) _buildOutOfStockOverlay(),
-                ],
-              ),
+    return InkWell(
+      onTap: isOutOfStock ? null : onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product image (정사각형)
+          AspectRatio(
+            aspectRatio: 1.0,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _buildProductImage(isDark, isOutOfStock),
+                if (showActions && onToggleWishlist != null)
+                  _buildWishlistButton(),
+                if (isOutOfStock) _buildOutOfStockOverlay(),
+              ],
             ),
+          ),
 
-            // Product info
-            Expanded(
-              flex: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _buildProductInfo(isDark),
-              ),
-            ),
-          ],
-        ),
+          // Product info
+          Padding(
+            padding: const EdgeInsets.all(7.0),
+            child: _buildProductInfo(isDark),
+          ),
+        ],
       ),
     );
   }
@@ -105,20 +101,21 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildWishlistButton() {
     return Positioned(
-      top: AppSpacing.xs,
+      bottom: AppSpacing.xs,
       right: AppSpacing.xs,
       child: Material(
-        color: Colors.white.withValues(alpha: 0.9),
+        color: Colors.white.withValues(alpha: 0.95),
         borderRadius: AppSpacing.borderRadiusFull,
+        elevation: 2,
         child: InkWell(
           onTap: onToggleWishlist,
           borderRadius: AppSpacing.borderRadiusFull,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xs),
+            padding: const EdgeInsets.all(6),
             child: Icon(
               isInWishlist ? Icons.favorite : Icons.favorite_border,
-              color: isInWishlist ? AppColors.error : AppColors.textSecondary,
-              size: AppSpacing.iconSM,
+              color: isInWishlist ? AppColors.error : Colors.grey[600],
+              size: 20,
             ),
           ),
         ),
@@ -152,69 +149,104 @@ class ProductCard extends StatelessWidget {
   }
 
   Widget _buildProductInfo(bool isDark) {
+    // 할인율 계산 (임시로 10-50% 랜덤)
+    final discountPercent = 48;
+    final originalPrice = product.price * 1.5;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         // 상품명
-        Flexible(
-          child: Text(
-            product.name ?? '',
-            style: AppTypography.bodySmall.copyWith(
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-              fontSize: 12,
-              height: 1.3,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(height: 4),
-
-        // 가격 (더 크고 강조)
         Text(
-          '${(product.price ?? 0).toStringAsFixed(0)}원',
+          product.name ?? '',
           style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-            height: 1.0,
+            fontSize: 11.5,
+            height: 1.3,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 3),
 
-        // 배송 정보
+        // 가격 영역
         Row(
           children: [
-            Icon(
-              Icons.local_shipping_outlined,
-              size: 10,
-              color: AppColors.primary,
-            ),
-            const SizedBox(width: 2),
+            // 할인율
             Text(
-              '무료배송',
+              '$discountPercent%',
               style: TextStyle(
-                fontSize: 10,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
-                height: 1.0,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue[700],
+              ),
+            ),
+            const SizedBox(width: 4),
+            // 할인가
+            Expanded(
+              child: Text(
+                FormatUtils.formatPrice(product.price),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
+        const SizedBox(height: 1),
+
+        // 원가
+        Text(
+          FormatUtils.formatPrice(originalPrice),
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey[500],
+            decoration: TextDecoration.lineThrough,
+          ),
+        ),
         const SizedBox(height: 2),
 
-        // 판매자 정보
-        Text(
-          '판매자: ${product.sellerId}',
-          style: TextStyle(
-            fontSize: 9,
-            color: isDark ? AppColors.textTertiaryDark : AppColors.textTertiary,
-            height: 1.0,
+        // 무료배송 배지
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(2),
+            border: Border.all(color: Colors.grey[300]!, width: 0.5),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          child: Text(
+            '무료배송',
+            style: TextStyle(
+              fontSize: 9,
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+
+        // 별점 및 리뷰 수
+        Row(
+          children: [
+            Icon(
+              Icons.star,
+              size: 11,
+              color: Colors.blue[700],
+            ),
+            const SizedBox(width: 2),
+            Text(
+              '4.5 (2,340)',
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
         ),
       ],
     );

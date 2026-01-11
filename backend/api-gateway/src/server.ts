@@ -115,6 +115,37 @@ const services: ServiceConfig[] = [
   // Auth service - no auth required (handles its own auth)
   { path: "/api/v1/auth", target: "http://auth-service:3001", auth: "none" },
 
+  // Seller auth (sign-up, sign-in, me) - handled by auth-service
+  {
+    path: "/api/v1/sellers/sign-up",
+    target: "http://auth-service:3001",
+    auth: "none",
+  },
+  {
+    path: "/api/v1/sellers/sign-in",
+    target: "http://auth-service:3001",
+    auth: "none",
+  },
+  {
+    path: "/api/v1/sellers/me",
+    target: "http://auth-service:3001",
+    auth: "required",
+    roles: ["seller"],
+  },
+
+  // Admin auth (sign-in, me) - handled by auth-service
+  {
+    path: "/api/v1/admin/sign-in",
+    target: "http://auth-service:3001",
+    auth: "none",
+  },
+  {
+    path: "/api/v1/admin/me",
+    target: "http://auth-service:3001",
+    auth: "required",
+    roles: ["admin"],
+  },
+
   // User service - auth optional (checkin can be viewed by anyone)
   { path: "/api/v1/users", target: "http://user-service:3002", auth: "optional" },
   {
@@ -137,6 +168,14 @@ const services: ServiceConfig[] = [
 
   // Order service - auth required
   { path: "/api/v1/orders", target: "http://localhost:3004", auth: "required" },
+
+  // Partner order management - seller or admin role
+  {
+    path: "/api/v1/orders/partner",
+    target: "http://localhost:3004",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
 
   // Payment service - auth required
   {
@@ -197,7 +236,7 @@ const services: ServiceConfig[] = [
   },
 
   // Search service - no auth required (public) + caching
-  { path: "/api/v1/search", target: "http://localhost:3013", auth: "none" },
+  { path: "/api/v1/search", target: "http://search-service:3013", auth: "none" },
 
   // Admin service - auth required, admin role only
   {
@@ -220,6 +259,74 @@ const services: ServiceConfig[] = [
 
   // Cart service - auth required
   { path: "/api/v1/cart", target: "http://localhost:3017", auth: "required" },
+
+  // Wishlist service - optional auth (handled by user-service)
+  { path: "/api/v1/wishlist", target: "http://user-service:3002", auth: "optional" },
+
+  // Banner service - optional auth
+  { path: "/api/v1/banners", target: "http://banner-service:3017", auth: "optional" },
+
+  // Partner order management - seller or admin role
+  {
+    path: "/api/v1/partner/orders",
+    target: "http://order-service:3004",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
+
+  // Partner cancellation management - seller or admin role
+  {
+    path: "/api/v1/partner/cancellations",
+    target: "http://order-service:3004",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
+
+  // Partner return management - seller or admin role
+  {
+    path: "/api/v1/partner/returns",
+    target: "http://order-service:3004",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
+
+  // Partner delivery management - seller or admin role
+  {
+    path: "/api/v1/partner/deliveries",
+    target: "http://shipping-service:3006",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
+
+  // Partner settlement management - seller or admin role
+  {
+    path: "/api/v1/partner/settlements",
+    target: "http://settlement-service:3008",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
+
+  // Sales service - admin or seller role
+  {
+    path: "/api/v1/sales",
+    target: "http://stats-service:3016",
+    auth: "required",
+    roles: ["admin", "seller"],
+  },
+
+  // Attachments service - auth required
+  {
+    path: "/api/v1/attachments",
+    target: "http://file-service:3015",
+    auth: "required",
+  },
+
+  // Terms service - optional auth (public access)
+  {
+    path: "/api/v1/terms",
+    target: "http://admin-service:3014",
+    auth: "optional",
+  },
 ];
 
 // Apply stricter rate limiting to auth endpoints

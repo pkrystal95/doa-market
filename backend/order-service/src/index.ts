@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import orderRoutes from './routes/order.routes';
+import partnerCancellationRoutes from './routes/partner-cancellation.routes';
+import partnerReturnRoutes from './routes/partner-return.routes';
 import { sequelize } from './config/database';
 import { logger } from './utils/logger';
 import { swaggerSpec } from './config/swagger';
@@ -36,6 +38,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/partner/cancellations', partnerCancellationRoutes);
+app.use('/api/v1/partner/returns', partnerReturnRoutes);
 
 const startServer = async () => {
   try {

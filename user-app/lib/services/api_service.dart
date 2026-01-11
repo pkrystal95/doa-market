@@ -6,7 +6,7 @@ import 'package:http/io_client.dart';
 class ApiService {
   // 로컬 개발 환경용 API 엔드포인트 - 각 서비스에 직접 연결 (임시)
   // 프로덕션에서는 nginx 리버스 프록시를 통해 HTTPS 사용
-  static const String hostIp = 'localhost';
+  static const String hostIp = '192.168.0.15';
   static const String baseUrl = 'http://$hostIp:3000/api/v1'; // API Gateway 사용
 
   // HTTP Client that accepts self-signed certificates (for development/testing)
@@ -31,6 +31,7 @@ class ApiService {
   static const String cartServiceUrl = 'http://$hostIp:3000/api/v1';
   static const String wishlistServiceUrl = 'http://$hostIp:3000/api/v1';
   static const String addressServiceUrl = 'http://$hostIp:3002/api/v1';
+  static const String adminServiceUrl = 'http://$hostIp:3014/api/v1';
   static const String sellerServiceUrl = 'http://$hostIp:3000/api/v1';
 
   String? _token;
@@ -358,7 +359,7 @@ class ApiService {
   Future<Map<String, dynamic>> getAddresses(String userId) async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/users/$userId/addresses'),
+        Uri.parse('$addressServiceUrl/users/$userId/addresses'),
         headers: _getHeaders(),
       );
 
@@ -379,7 +380,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.post(
-        Uri.parse('$baseUrl/users/$userId/addresses'),
+        Uri.parse('$addressServiceUrl/users/$userId/addresses'),
         headers: _getHeaders(),
         body: json.encode(addressData),
       );
@@ -402,7 +403,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.put(
-        Uri.parse('$baseUrl/users/$userId/addresses/$addressId'),
+        Uri.parse('$addressServiceUrl/users/$userId/addresses/$addressId'),
         headers: _getHeaders(),
         body: json.encode(addressData),
       );
@@ -424,7 +425,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.delete(
-        Uri.parse('$baseUrl/users/$userId/addresses/$addressId'),
+        Uri.parse('$addressServiceUrl/users/$userId/addresses/$addressId'),
         headers: _getHeaders(),
       );
 
@@ -443,7 +444,7 @@ class ApiService {
   // 카테고리 목록 조회
   Future<Map<String, dynamic>> getCategories({String? parentId}) async {
     try {
-      String url = categoryServiceUrl;
+      String url = '$categoryServiceUrl/categories';
       if (parentId != null) {
         url += '?parentId=$parentId';
       }
@@ -494,7 +495,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/search?keyword=$keyword'),
+        Uri.parse('$baseUrl/products?search=$keyword'),
         headers: _getHeaders(),
       );
 
@@ -553,7 +554,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.post(
-        Uri.parse('$baseUrl/wishlist'),
+        Uri.parse('$userServiceUrl/wishlist'),
         headers: _getHeaders(),
         body: json.encode({
           'userId': userId,
@@ -578,7 +579,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.delete(
-        Uri.parse('$baseUrl/wishlist/$userId/$productId'),
+        Uri.parse('$userServiceUrl/wishlist/$userId/$productId'),
         headers: _getHeaders(),
       );
 
@@ -596,7 +597,7 @@ class ApiService {
   Future<Map<String, dynamic>> getUserWishlist(String userId) async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/wishlist/user/$userId'),
+        Uri.parse('$userServiceUrl/wishlist/user/$userId'),
         headers: _getHeaders(),
       );
 
@@ -617,7 +618,7 @@ class ApiService {
   }) async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/wishlist/check/$userId/$productId'),
+        Uri.parse('$userServiceUrl/wishlist/check/$userId/$productId'),
         headers: _getHeaders(),
       );
 
@@ -636,7 +637,7 @@ class ApiService {
   Future<int> getWishlistCount(String userId) async {
     try {
       final response = await client.get(
-        Uri.parse('$baseUrl/wishlist/count/$userId'),
+        Uri.parse('$userServiceUrl/wishlist/count/$userId'),
         headers: _getHeaders(),
       );
 
@@ -785,7 +786,7 @@ class ApiService {
     String? priority,
   }) async {
     try {
-      String url = '$baseUrl/notices?page=$page&limit=$limit';
+      String url = '$adminServiceUrl/notices?page=$page&limit=$limit';
       if (category != null) {
         url += '&category=$category';
       }
@@ -803,7 +804,7 @@ class ApiService {
   /// 공지사항 상세 조회
   Future<Map<String, dynamic>> getNotice(String noticeId) async {
     try {
-      final url = Uri.parse('$baseUrl/notices/$noticeId');
+      final url = Uri.parse('$adminServiceUrl/notices/$noticeId');
       final response = await client.get(url, headers: _getHeaders());
 
       return json.decode(response.body);
@@ -971,8 +972,19 @@ class ApiService {
         }),
       );
 
-      return json.decode(response.body);
+      final data = json.decode(response.body);
+
+      // Check if the request was successful
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return data;
+      } else {
+        // Return error message from backend
+        throw Exception(data['message'] ?? '문의 등록에 실패했습니다');
+      }
     } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('네트워크 오류: $e');
     }
   }

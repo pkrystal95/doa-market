@@ -3,7 +3,6 @@ import Product from '../models/product.model';
 import { eventBus } from '../index';
 import { EventType } from '../events/types';
 import { logger } from '../utils/logger';
-import axios from 'axios';
 
 const router = Router();
 
@@ -81,7 +80,7 @@ router.put('/:id', async (req, res) => {
         updates: {
           ...updates,
           price: updates.price ? parseFloat(updates.price.toString()) : undefined,
-          updatedAt: product.updatedAt.toISOString(),
+          updatedAt: product.updatedAt ? product.updatedAt.toISOString() : new Date().toISOString(),
         },
       });
 
